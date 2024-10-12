@@ -16,6 +16,7 @@ x86/
 *.appxbundle
 *.apk
 *.app
+*.exe
 
 # Visual Studio Code specific files
 .vscode/
