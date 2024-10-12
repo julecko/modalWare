@@ -1,0 +1,5 @@
+LICENSE
+
+Copyright © 2024 Julecko
+
+All rights reserved. This software may not be copied, modified, published, or distributed in any form without the express written permission of the copyright owner.
