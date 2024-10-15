@@ -39,7 +39,7 @@ public:
 private:
     FARPROC func = nullptr;
 };
-std::vector<FunctionPointer> listExportedFunctions(const HMODULE& hModule) {
+static std::vector<FunctionPointer> listExportedFunctions(const HMODULE& hModule) {
     std::vector<FunctionPointer> functions;
 
     PIMAGE_DOS_HEADER pDosHeader = (PIMAGE_DOS_HEADER)hModule;

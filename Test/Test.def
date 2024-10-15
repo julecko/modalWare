@@ -1,0 +1,4 @@
+LIBRARY Test
+EXPORTS
+    add
+    hello

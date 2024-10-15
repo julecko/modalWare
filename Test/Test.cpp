@@ -1,18 +1,15 @@
 // mylibrary.cpp
 #include <iostream>
-
 #ifdef MYLIBRARY_EXPORTS
-#define MYLIBRARY_API __declspec(dllexport)
+#define EXPORT_FUNCTION extern "C" __declspec(dllexport)
 #else
-#define MYLIBRARY_API
+#define EXPORT_FUNCTION
 #endif
 
-extern "C" {
-    MYLIBRARY_API void hello() {
-        std::cout << "Hello from the DLL!" << std::endl;
-    }
+EXPORT_FUNCTION void hello() {
+    std::cout << "Hello from the DLL!" << std::endl;
+}
 
-    MYLIBRARY_API int add(int a, int b) {
-        return a + b;
-    }
+EXPORT_FUNCTION int add(int a, int b) {
+    return a + b;
 }
