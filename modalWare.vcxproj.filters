@@ -21,13 +21,32 @@
     <ClCompile Include="Test\Test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Communication\discordAPI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Communication\WebRequests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Test\Test.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Communication\discordAPI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Communication\WebRequest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
+    <None Include="LICENSE" />
+    <None Include="compile_library.bat">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="Test\Test.def">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
