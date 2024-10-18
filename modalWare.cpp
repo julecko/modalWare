@@ -3,6 +3,8 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include "./Communication/discordAPI.h"
+#include "./ModulConfig/Config.h"
 
 class FunctionPointer {
 public:
@@ -85,7 +87,7 @@ static std::vector<FunctionPointer> listExportedFunctions(const HMODULE& hModule
     return functions;
 }
 
-int main() {
+int main_test() {
     std::string dllPath = "test.dll";
     HMODULE hModule = LoadLibraryA(dllPath.c_str());
     if (hModule == NULL) {
@@ -105,4 +107,7 @@ int main() {
     else {
         std::cerr << "Not enough functions found in the DLL." << std::endl;
     }
+    return 0;
+}
+int main() {
 }

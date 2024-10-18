@@ -33,16 +33,57 @@ std::unordered_map<std::string, std::string> ConfigManager::getValues() {
     else {
         std::cerr << "Error opening file!" << std::endl;
     }
-
     return envMap;
 }
-int ConfigManager::writeValue(const std::string& key, const std::string& value) {
+int ConfigManager::addValue(const std::string& key, const std::string& value) {
     std::ofstream outFile(this->filename, std::ios::app);
     if (!outFile.is_open()) {
         return 1;
     }
     outFile << key << "=" << value << std::endl;
     return 0;
+}
+int ConfigManager::changeValue(const std::string& key, const std::string& newValue) {
+    auto values = getValues();
+
+    if (values.find(key) != values.end()) {
+        values[key] = newValue;
+
+        std::ofstream outFile(this->filename);
+        if (!outFile.is_open()) {
+            return 1;
+        }
+        for (const auto& [k, v] : values) {
+            outFile << k << "=" << v << std::endl;
+        }
+        outFile.close();
+        return 0;
+    }
+    return 2;
+}
+int ConfigManager::deleteValue(const std::string& key) {
+    auto values = getValues();
+
+    values.erase(key);
+    std::ofstream outFile(this->filename);
+    if (!outFile.is_open()) {
+        return 1;
+    }
+    for (const auto& [k, v] : values) {
+        outFile << k << "=" << v << std::endl;
+    }
+    outFile.close();
+    return 0;
+}
+int ConfigManager::renameFile(const std::string& newName) {
+    try {
+        std::filesystem::rename(this->filename, newName);
+        this->filename = newName;
+        return 0;
+    }
+    catch (const std::filesystem::filesystem_error& e) {
+        return 1;
+    }
 }
 int ConfigManager::deleteFile() {
     try {

@@ -27,6 +27,9 @@
     <ClCompile Include="Communication\WebRequests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ModulConfig\Config.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Test\Test.h">
@@ -36,6 +39,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Communication\WebRequest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ModulConfig\Config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
