@@ -108,7 +108,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;ASIO_STANDALONE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalLibraryDirectories>$(VcpkgRoot)\installed\x64-windows-static\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -144,7 +144,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Communication\discordAPI.cpp" />
     <ClCompile Include="Communication\WebRequests.cpp" />
     <ClCompile Include="modalWare.cpp" />
     <ClCompile Include="ModulConfig\Config.cpp" />
@@ -157,10 +156,14 @@
     <ClInclude Include="Test\Test.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include=".env" />
     <None Include="compile_library.bat" />
     <None Include="LICENSE" />
     <None Include="README.md" />
     <None Include="Test\Test.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Notes.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

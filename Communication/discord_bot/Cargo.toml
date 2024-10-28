@@ -1,0 +1,23 @@
+[package]
+name = "discord_bot"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serenity = { version = "0.10", features = ["client", "model", "gateway", "http", "utils"] }
+dotenv = "0.15"
+tokio = { version = "1", features = ["full"] }
+
+[build-dependencies]
+dotenv = "0.15"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies.windows]
+version = "0.*"
+features = [
+    "Win32_Foundation",
+    "Win32_System_SystemServices",
+    "Win32_UI_WindowsAndMessaging",
+]

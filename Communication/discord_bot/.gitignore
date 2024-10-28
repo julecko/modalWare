@@ -1,0 +1,9 @@
+# Rust build files
+/target/
+# IDE or editor specific files
+.idea/
+.vscode/
+*.iml
+/.cargo/
+*.dll
+.env

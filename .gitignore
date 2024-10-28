@@ -48,3 +48,5 @@ packages/
 *.dbproj.schemaview
 *.dbproj.user
 *.dbproj
+
+.env

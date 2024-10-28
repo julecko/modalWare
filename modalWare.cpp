@@ -1,9 +1,9 @@
 // main.cpp
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <iostream>
 #include <vector>
 #include <string>
-#include "./Communication/discordAPI.h"
 #include "./ModulConfig/Config.h"
 
 class FunctionPointer {
@@ -88,7 +88,7 @@ static std::vector<FunctionPointer> listExportedFunctions(const HMODULE& hModule
 }
 
 int main_test() {
-    std::string dllPath = "test.dll";
+    std::string dllPath = "discord_bot.dll";
     HMODULE hModule = LoadLibraryA(dllPath.c_str());
     if (hModule == NULL) {
         std::cerr << "Failed to load the DLL: " << dllPath << std::endl;
@@ -110,4 +110,5 @@ int main_test() {
     return 0;
 }
 int main() {
+    main_test();
 }
