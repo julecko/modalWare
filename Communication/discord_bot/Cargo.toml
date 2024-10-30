@@ -4,7 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-serenity = { version = "0.10", features = ["client", "model", "gateway", "http", "utils"] }
+once_cell = "1.10"
+serenity = { version = "0.10", features = ["client", "model", "gateway", "http", "utils", "rustls_backend"], default-features = false}
 dotenv = "0.15"
 tokio = { version = "1", features = ["full"] }
 
