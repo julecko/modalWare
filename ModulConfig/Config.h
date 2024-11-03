@@ -18,7 +18,16 @@ public:
 	 *
 	 * @return Returns hashmap of config file
 	 */
-	std::unordered_map<std::string, std::string> getValues();
+	std::unordered_map<std::string, std::string> getPairs();
+
+	/**
+	* @brief Get single value
+	* 
+	* Gets all values using getValues and chooses only one
+	* 
+	* @return Returns single value
+	*/
+	std::string getValue(const std::string& key);
 
 	/**
 	 * @brief Writes new pair of key, value into config file
@@ -54,6 +63,13 @@ public:
 	* @return Returns 0 if successful, 1 on failure
 	*/
 	int deleteFile();
+
+	/**
+	* @brief Replaces filename in path
+	*
+	* @return Returns new filename
+	*/
+	static std::filesystem::path replaceFilename(const std::filesystem::path& dllPath, const std::string& newFilename);
 private:
 	std::string filename;
 };

@@ -144,14 +144,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Communication\WebRequests.cpp" />
     <ClCompile Include="modalWare.cpp" />
     <ClCompile Include="ModulConfig\Config.cpp" />
-    <ClCompile Include="Test\Test.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Communication\discordAPI.h" />
-    <ClInclude Include="Communication\WebRequest.h" />
     <ClInclude Include="ModulConfig\Config.h" />
     <ClInclude Include="Test\Test.h" />
   </ItemGroup>
@@ -161,9 +157,6 @@
     <None Include="LICENSE" />
     <None Include="README.md" />
     <None Include="Test\Test.def" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="Notes.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

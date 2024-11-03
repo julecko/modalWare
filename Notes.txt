@@ -1,1 +1,0 @@
-It will have main function to set everything up and than loop, which will process messages send by communication server

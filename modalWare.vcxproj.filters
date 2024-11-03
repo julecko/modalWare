@@ -18,24 +18,12 @@
     <ClCompile Include="modalWare.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Test\Test.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Communication\WebRequests.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ModulConfig\Config.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Test\Test.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Communication\discordAPI.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Communication\WebRequest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ModulConfig\Config.h">
@@ -52,8 +40,5 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include=".env" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="Notes.txt" />
   </ItemGroup>
 </Project>

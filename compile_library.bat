@@ -6,8 +6,9 @@ if "%1"=="" (
 )
 set fileName=%~dp1%~n1
 
-g++ -shared -o %fileName%.dll %fileName%.def %1 -DMYLIBRARY_EXPORTS
+g++ -shared -o %fileName%.dll %fileName%.def %1 -DMYLIBRARY_EXPORTS ./ModulConfig/Config.cpp
 
+echo "File saved in " %fileName%.dll
 
 if %errorlevel% neq 0 (
     echo Compilation failed.

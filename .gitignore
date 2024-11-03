@@ -49,4 +49,6 @@ packages/
 *.dbproj.user
 *.dbproj
 
+# Custom
 .env
+modules/*

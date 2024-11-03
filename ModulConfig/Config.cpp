@@ -16,7 +16,7 @@ static std::pair<std::string, std::string> split(const std::string& line, char d
 
     return { key, value };
 }
-std::unordered_map<std::string, std::string> ConfigManager::getValues() {
+std::unordered_map<std::string, std::string> ConfigManager::getPairs() {
     std::unordered_map<std::string, std::string> envMap;
     std::ifstream inFile(this->filename);
     std::string line;
@@ -35,6 +35,16 @@ std::unordered_map<std::string, std::string> ConfigManager::getValues() {
     }
     return envMap;
 }
+std::string ConfigManager::getValue(const std::string& key) {
+    std::unordered_map<std::string, std::string> pairs = this->getPairs();
+    auto it = pairs.find(key);
+    if (it != pairs.end()) {
+        return it->second;
+    }
+    else {
+        return "";
+    }
+}
 int ConfigManager::addValue(const std::string& key, const std::string& value) {
     std::ofstream outFile(this->filename, std::ios::app);
     if (!outFile.is_open()) {
@@ -44,7 +54,7 @@ int ConfigManager::addValue(const std::string& key, const std::string& value) {
     return 0;
 }
 int ConfigManager::changeValue(const std::string& key, const std::string& newValue) {
-    auto values = getValues();
+    auto values = this->getPairs();
 
     if (values.find(key) != values.end()) {
         values[key] = newValue;
@@ -62,7 +72,7 @@ int ConfigManager::changeValue(const std::string& key, const std::string& newVal
     return 2;
 }
 int ConfigManager::deleteValue(const std::string& key) {
-    auto values = getValues();
+    auto values = this->getPairs();
 
     values.erase(key);
     std::ofstream outFile(this->filename);
@@ -97,4 +107,8 @@ int ConfigManager::deleteFile() {
     catch (const std::filesystem::filesystem_error& e) {
         return 2;
     }
+}
+std::filesystem::path ConfigManager::replaceFilename(const std::filesystem::path& dllPath, const std::string& newFilename) {
+    std::filesystem::path parentPath = dllPath.parent_path();
+    return parentPath / newFilename;
 }

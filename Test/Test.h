@@ -9,6 +9,6 @@
 
 EXPORT_FUNCTION void hello();
 EXPORT_FUNCTION int add(int a, int b);
-
+EXPORT_FUNCTION void initialize()
 
 #endif

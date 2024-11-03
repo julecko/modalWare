@@ -1,10 +1,19 @@
 // main.cpp
-#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <iostream>
 #include <vector>
 #include <string>
+#include <thread>
+#include <unordered_map>
 #include "./ModulConfig/Config.h"
+
+class FunctionPointer;
+
+struct ModuleStruct {
+    std::string version;
+    HMODULE hmodule;
+    std::unordered_map<std::string, FunctionPointer> functions;
+};
 
 class FunctionPointer {
 public:
@@ -30,7 +39,7 @@ public:
         return 0;
     }
     template <typename Ret, typename... Args>
-    Ret call(Args... args) {
+    Ret call(Args... args) const{
         using FuncPtr = Ret(*)(Args...);
         FuncPtr f = reinterpret_cast<FuncPtr>(this->func);
         if (!f) {
@@ -41,15 +50,15 @@ public:
 private:
     FARPROC func = nullptr;
 };
-static std::vector<FunctionPointer> listExportedFunctions(const HMODULE& hModule) {
-    std::vector<FunctionPointer> functions;
+static std::unordered_map<std::string, FunctionPointer> listExportedFunctions(const HMODULE& hModule) {
+    std::unordered_map<std::string, FunctionPointer> functionMap;
 
     PIMAGE_DOS_HEADER pDosHeader = (PIMAGE_DOS_HEADER)hModule;
 
     if (pDosHeader->e_magic != IMAGE_DOS_SIGNATURE) {
         std::cerr << "Invalid DOS signature." << std::endl;
         FreeLibrary(hModule);
-        return functions;
+        return functionMap;
     }
 
     PIMAGE_NT_HEADERS pNTHeaders = (PIMAGE_NT_HEADERS)((BYTE*)hModule + pDosHeader->e_lfanew);
@@ -57,14 +66,14 @@ static std::vector<FunctionPointer> listExportedFunctions(const HMODULE& hModule
     if (pNTHeaders->Signature != IMAGE_NT_SIGNATURE) {
         std::cerr << "Invalid NT signature." << std::endl;
         FreeLibrary(hModule);
-        return functions;
+        return functionMap;
     }
 
     DWORD exportDirRVA = pNTHeaders->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress;
     if (exportDirRVA == 0) {
         std::cerr << "No export directory found." << std::endl;
         FreeLibrary(hModule);
-        return functions;
+        return functionMap;
     }
 
     PIMAGE_EXPORT_DIRECTORY pExportDir = (PIMAGE_EXPORT_DIRECTORY)((BYTE*)hModule + exportDirRVA);
@@ -74,41 +83,83 @@ static std::vector<FunctionPointer> listExportedFunctions(const HMODULE& hModule
     WORD* ordinals = (WORD*)((BYTE*)hModule + pExportDir->AddressOfNameOrdinals);
 
     for (DWORD i = 0; i < pExportDir->NumberOfNames; ++i) {
-        FunctionPointer tempFP;
         const char* currentFunctionName = (const char*)hModule + names[i];
-        tempFP.name = currentFunctionName;
         WORD ordinal = ordinals[i];
         DWORD functionRVA = addressesRVA[ordinal];
         FARPROC functionAddress = (FARPROC)((BYTE*)hModule + functionRVA);
 
+        FunctionPointer tempFP;
         tempFP.setDirect(functionAddress);
-        functions.push_back(tempFP);
-    }
-    return functions;
-}
 
-int main_test() {
-    std::string dllPath = "discord_bot.dll";
-    HMODULE hModule = LoadLibraryA(dllPath.c_str());
-    if (hModule == NULL) {
-        std::cerr << "Failed to load the DLL: " << dllPath << std::endl;
+        functionMap[currentFunctionName] = tempFP;
+    }
+    return functionMap;
+}
+static int initializeModul(std::unordered_map<std::string, FunctionPointer>& functions, std::string location) {
+    auto it = functions.find("initialize");
+    if (it == functions.end()) {
+        std::cout << "Error initializing" << std::endl;
         return 1;
     }
-
-    std::vector<FunctionPointer> functions = listExportedFunctions(hModule);
-
-    std::cout << "Functions exported by " << dllPath << ":" << std::endl;
-    for (const auto& func : functions) {
-        std::cout << func.name << std::endl;
-    }
-    if (functions.size() > 1) {
-        functions[1].call<void>();
-    }
-    else {
-        std::cerr << "Not enough functions found in the DLL." << std::endl;
-    }
+    it->second.call<void, const char*>(location.c_str());
+    std::cout << "Initialized" << std::endl;
     return 0;
 }
+static std::vector<std::filesystem::path> getExtensionsPath() {
+    std::vector<std::filesystem::path> paths;
+    std::filesystem::path basePath = std::filesystem::current_path() / "modules";
+
+    std::cout << "Searching in directory: " << basePath << std::endl;
+
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(basePath)) {
+        if (entry.is_regular_file() && entry.path().extension() == ".dll") {
+            paths.push_back(std::filesystem::absolute(entry.path()));
+            std::cout << "Found: " << entry.path() << std::endl;
+        }
+    }
+    return paths;
+}
+static std::unordered_map<std::string, ModuleStruct> loadExtensions(std::vector<std::filesystem::path> paths) {
+    std::unordered_map<std::string, ModuleStruct> extensions;
+    for (const std::filesystem::path path : paths) {
+        ModuleStruct module;
+
+        module.hmodule = LoadLibraryA(path.string().c_str());
+        module.functions = listExportedFunctions(module.hmodule);
+
+        std::string confFilePath = ConfigManager::replaceFilename(path, "config").string();
+        initializeModul(module.functions, confFilePath);
+        ConfigManager manager(confFilePath);
+
+        std::string version = manager.getValue("VERSION");
+        if (version.empty()) {
+            std::cout << "Corrupted config File -> " << path.string() << std::endl;
+        }
+        else {
+            module.version = version;
+        }
+
+        // TODO add configuration loading
+
+        extensions[path.filename().string()] = module;
+    }
+    return extensions;
+}
+static std::unordered_map<std::string, ModuleStruct> getExtensions() {
+    std::vector<std::filesystem::path> paths = getExtensionsPath();
+    std::cout << "\n";
+    std::unordered_map<std::string, ModuleStruct> extensions = loadExtensions(paths);
+    return extensions;
+}
 int main() {
-    main_test();
+    std::unordered_map<std::string, ModuleStruct> extensions = getExtensions();
+
+    for (const auto& [moduleName, moduleStruct] : extensions) {
+        std::cout << "Loaded module: " << moduleName << std::endl;
+
+        for (const auto& [functionName, functionPointer] : moduleStruct.functions) {
+            std::cout << "  Function: " << functionName << std::endl;
+        }
+    }
+    return 0;
 }
