@@ -1,57 +1,35 @@
-#include <iostream>
 #include <Windows.h>
+#include <iostream>
 #include <thread>
 
-typedef uint32_t (*SendMessageFunc)(const char*);
-typedef const char* (*GetMessageFunc)();
+typedef void(*AttachProcessFunc)();
 
 int main() {
     // Load the DLL
-    HMODULE hModule = LoadLibraryA("discord_bot.dll");
+    HMODULE hModule = LoadLibrary(TEXT("discord_bot.dll")); // Change this to your DLL path
     if (!hModule) {
-        std::cerr << "Could not load the DLL!" << std::endl;
+        std::cerr << "Failed to load the DLL!" << std::endl;
         return 1;
     }
 
-    SendMessageFunc send_message = (SendMessageFunc)GetProcAddress(hModule, "send_message");
-    if (!send_message) {
-        std::cerr << "Could not find send_message function in the DLL!" << std::endl;
+    // Get function pointers
+    AttachProcessFunc attach_process = (AttachProcessFunc)GetProcAddress(hModule, "attach_process");
+
+    if (!attach_process) {
+        std::cerr << "Failed to get function addresses!" << std::endl;
         FreeLibrary(hModule);
         return 1;
     }
 
-    GetMessageFunc get_message = (GetMessageFunc)GetProcAddress(hModule, "get_message");
-    if (!get_message) {
-        std::cerr << "Could not find get_message function in the DLL!" << std::endl;
-        FreeLibrary(hModule);
-        return 1;
-    }
-    std::this_thread::sleep_for(std::chrono::seconds(3));
-    std::cout << "TEST" << std::endl;
-    const char* testMessage = "Hello from C++!";
-    try {
-        int result = send_message(testMessage);
-        if (result == 0) {
-            std::cout << "Message sent successfully!" << std::endl;
-        } else {
-            std::cerr << "Failed to send message! Result code: " << result << std::endl;
-        }
-    } catch (const std::exception& e) {
-        std::cerr << "Exception occurred while sending message: " << e.what() << std::endl;
-    } catch (...) {
-        std::cerr << "An unknown error occurred while sending message." << std::endl;
-    }
-    // Retrieve messages in a loop
-    for (int i = 0; i < 5; ++i) {  // Retrieve up to 5 messages
-        const char* message = get_message();
-        if (message) {
-            std::cout << "Received message: " << message << std::endl;
-        } else {
-            std::cout << "No new messages in queue." << std::endl;
-        }
+    std::thread bot_thread(attach_process);
+    bot_thread.detach();
+    std::cout << "Discord bot started." << std::endl;
 
-        std::this_thread::sleep_for(std::chrono::seconds(2));
-    }
+    // Wait for 10 seconds
+    std::this_thread::sleep_for(std::chrono::seconds(10));
+
+    std::cout << "Discord bot stopped." << std::endl;
+    std::this_thread::sleep_for(std::chrono::seconds(10));
 
     FreeLibrary(hModule);
     return 0;

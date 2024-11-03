@@ -4,22 +4,22 @@ use serenity::prelude::*;
 use serenity::model::id::{GuildId, ChannelId};
 use serenity::Client;
 use std::env;
+use std::sync::atomic::{AtomicBool, Ordering};
 use serenity::http::Http;
 use std::ffi::{c_char, CStr, CString};
 use std::sync::{Arc, Mutex};
 use std::collections::VecDeque;
 use serenity::model::gateway::Ready;
-use once_cell::sync::{Lazy, OnceCell};
+use once_cell::sync::Lazy;
 use windows::Win32::Foundation::*;
 use windows::Win32::System::SystemServices::*;
 use tokio::runtime::Runtime;
-use std::thread;
 
-const TOKEN: &str = "TOKEN";
-const MY_GUILD_ID: u64 = GUILD_ID;
+const TOKEN: &str = "YOUR_DISCORD_TOKEN";
+const MY_GUILD_ID: u64 = 1083863758146912297;
 static mut GLOBAL_CHANNEL_ID: Option<ChannelId> = None;
 static mut SESSION_CHANNEL_ID: Option<ChannelId> = None;
-const BOT_ID: u64 = BOT_ID;
+const BOT_ID: u64 = 1146568289930190869;
 
 type MessageQueue = Arc<Mutex<VecDeque<String>>>;
 struct Handler;
@@ -60,7 +60,7 @@ fn is_valid_source(message: &Message) -> bool {
 async fn set_global_channel(ctx: &Context) {
     let channels = match ctx.http.get_channels(MY_GUILD_ID).await {
         Ok(channels) => channels,
-        Err(err) => {
+        Err(_err) => {
             return;
         }
     };
@@ -83,7 +83,7 @@ async fn set_session_channel(ctx: &Context) {
 
     let channels = match ctx.http.get_channels(MY_GUILD_ID).await {
         Ok(channels) => channels,
-        Err(err) => {
+        Err(_err) => {
             return;
         }
     };
@@ -134,27 +134,21 @@ fn enqueue_message(message: String) {
 
 
 static MESSAGE_QUEUE: Lazy<MessageQueue> = Lazy::new(|| Arc::new(Mutex::new(VecDeque::new())));
-static BOT_TASK: Lazy<OnceCell<thread::JoinHandle<()>>> = Lazy::new(|| OnceCell::new());
-
 #[no_mangle]
-pub fn attach_process() {
-    let bot_thread = thread::spawn(move || {
-        let runtime = tokio::runtime::Runtime::new().expect("Failed to create Tokio runtime");
+pub extern "C" fn attach_process() {
+    let runtime = tokio::runtime::Runtime::new().expect("Failed to create Tokio runtime");
 
-        runtime.block_on(async {
-            let mut client = Client::builder(TOKEN)
-                .event_handler(Handler)
-                .await
-                .expect("Err creating client");
+    runtime.block_on(async {
+        let mut client = Client::builder(TOKEN)
+            .event_handler(Handler)
+            .await
+            .expect("Error creating client");
 
-            if let Err(why) = client.start().await {
-                eprintln!("Client error: {:?}", why);
-            }
-        });
+        if let Err(why) = client.start().await {
+            println!("Err with client: {:?}", why);
+        }
     });
-    BOT_TASK.set(bot_thread).expect("Failed to set bot task");
 }
-
 #[no_mangle]
 pub extern "C" fn get_message() -> *const c_char {
     let mut queue = MESSAGE_QUEUE.lock().unwrap();
@@ -222,8 +216,6 @@ extern "system" fn DllMain(
     _: *mut (),
 ) -> bool {
     match call_reason {
-        DLL_PROCESS_ATTACH => attach_process(),
-        DLL_PROCESS_DETACH => detach_process(),
         _ => (),
     }
     true
