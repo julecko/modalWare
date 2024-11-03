@@ -3,6 +3,7 @@
 #include <thread>
 
 typedef void(*AttachProcessFunc)();
+typedef bool (*VerifyCode)(const char*);
 
 int main() {
     // Load the DLL
@@ -14,12 +15,23 @@ int main() {
 
     // Get function pointers
     AttachProcessFunc attach_process = (AttachProcessFunc)GetProcAddress(hModule, "attach_process");
-
     if (!attach_process) {
         std::cerr << "Failed to get function addresses!" << std::endl;
         FreeLibrary(hModule);
         return 1;
     }
+     VerifyCode verify_code = (VerifyCode)GetProcAddress(hModule, "verify");
+
+        if (verify_code) {
+            const char* code = "12234";
+            if (verify_code(code)) {
+                std::cout << "Verification succeeded!" << std::endl;
+            } else {
+                std::cout << "Verification failed!" << std::endl;
+            }
+        } else {
+            std::cerr << "Could not find verify function!" << std::endl;
+        }
 
     std::thread bot_thread(attach_process);
     bot_thread.detach();

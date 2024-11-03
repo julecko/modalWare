@@ -132,10 +132,29 @@ fn enqueue_message(message: String) {
     queue.push_back(message);
 }
 
-
 static MESSAGE_QUEUE: Lazy<MessageQueue> = Lazy::new(|| Arc::new(Mutex::new(VecDeque::new())));
+static FUNCTION_VERIFIED: AtomicBool = AtomicBool::new(false);
+
+#[no_mangle]
+pub extern "C" fn verify(code: *const c_char) -> bool {
+    let code_str = unsafe {
+        if code.is_null() {
+            return false;
+        }
+        CStr::from_ptr(code).to_string_lossy().into_owned()
+    };
+    if code_str == "1234" {
+        FUNCTION_VERIFIED.store(true, Ordering::SeqCst);
+        true
+    } else {
+        false
+    }
+}
 #[no_mangle]
 pub extern "C" fn attach_process() {
+    if !FUNCTION_VERIFIED.load(Ordering::SeqCst){
+        return;
+    }
     let runtime = tokio::runtime::Runtime::new().expect("Failed to create Tokio runtime");
 
     runtime.block_on(async {
@@ -151,6 +170,9 @@ pub extern "C" fn attach_process() {
 }
 #[no_mangle]
 pub extern "C" fn get_message() -> *const c_char {
+    if !FUNCTION_VERIFIED.load(Ordering::SeqCst){
+        return std::ptr::null();
+    }
     let mut queue = MESSAGE_QUEUE.lock().unwrap();
     if let Some(message) = queue.pop_front() {
         let c_string = CString::new(message).expect("CString conversion failed");
@@ -161,6 +183,9 @@ pub extern "C" fn get_message() -> *const c_char {
 }
 #[no_mangle]
 pub extern "C" fn send_message(content: *const c_char) -> i32 {
+    if !FUNCTION_VERIFIED.load(Ordering::SeqCst){
+        return -1;
+    }
     if content.is_null() {
         return -1;
     }
