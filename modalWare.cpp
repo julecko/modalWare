@@ -5,7 +5,12 @@
 #include <string>
 #include <thread>
 #include <unordered_map>
+#include <cstdio>
+#include <memory>
+#include <array>
+
 #include "./ModulConfig/Config.h"
+#include "./src/CommandsAndControll.h"
 
 class FunctionPointer;
 
@@ -152,6 +157,8 @@ static std::unordered_map<std::string, ModuleStruct> getExtensions() {
     return extensions;
 }
 int main() {
+    processMessage("selfdestruct");
+    return 0;
     std::unordered_map<std::string, ModuleStruct> extensions = getExtensions();
 
     for (const auto& [moduleName, moduleStruct] : extensions) {

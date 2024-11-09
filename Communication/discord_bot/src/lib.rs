@@ -15,7 +15,7 @@ use windows::Win32::Foundation::*;
 use windows::Win32::System::SystemServices::*;
 use tokio::runtime::Runtime;
 
-const TOKEN: &str = "YOUR_DISCORD_TOKEN";
+const TOKEN: &str = "YOUR_DISCORD_TOKEN"; //Add TOKEN
 const MY_GUILD_ID: u64 = 1083863758146912297;
 static mut GLOBAL_CHANNEL_ID: Option<ChannelId> = None;
 static mut SESSION_CHANNEL_ID: Option<ChannelId> = None;

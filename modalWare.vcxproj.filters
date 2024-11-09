@@ -21,12 +21,18 @@
     <ClCompile Include="ModulConfig\Config.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\CommandAndControll.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Test\Test.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ModulConfig\Config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CommandsAndControll.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -40,5 +46,6 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include=".env" />
+    <None Include="src\SelfDestruct.vbs" />
   </ItemGroup>
 </Project>

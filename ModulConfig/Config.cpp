@@ -91,7 +91,7 @@ int ConfigManager::renameFile(const std::string& newName) {
         this->filename = newName;
         return 0;
     }
-    catch (const std::filesystem::filesystem_error& e) {
+    catch (const std::filesystem::filesystem_error&) {
         return 1;
     }
 }
@@ -104,7 +104,7 @@ int ConfigManager::deleteFile() {
             return 1;
         }
     }
-    catch (const std::filesystem::filesystem_error& e) {
+    catch (const std::filesystem::filesystem_error&) {
         return 2;
     }
 }
