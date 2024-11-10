@@ -6,7 +6,7 @@ if "%1"=="" (
 )
 set fileName=%~dp1%~n1
 
-g++ -shared -o %fileName%.dll %fileName%.def %1 -DMYLIBRARY_EXPORTS ./ModulConfig/Config.cpp
+g++ -shared -o %fileName%.dll %fileName%.def %1 -DMYLIBRARY_EXPORTS ./ConfigManager/Config.cpp
 
 echo "File saved in " %fileName%.dll
 

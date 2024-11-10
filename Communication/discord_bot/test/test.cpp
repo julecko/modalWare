@@ -1,6 +1,7 @@
 #include <Windows.h>
 #include <iostream>
 #include <thread>
+#include <atomic>
 
 typedef void(*AttachProcessFunc)();
 typedef bool (*VerifyCode)(const char*);
@@ -20,8 +21,7 @@ int main() {
         FreeLibrary(hModule);
         return 1;
     }
-     VerifyCode verify_code = (VerifyCode)GetProcAddress(hModule, "verify");
-
+    VerifyCode verify_code = (VerifyCode)GetProcAddress(hModule, "verify");
         if (verify_code) {
             const char* code = "12234";
             if (verify_code(code)) {

