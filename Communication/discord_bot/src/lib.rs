@@ -158,8 +158,7 @@ pub extern "C" fn initialize(code: *const c_char, path: *const c_char) -> i32 {
     if Path::new(&path_str).exists() {
         return 1;
     }
-    let content = "
-                    type=communication\n\
+    let content = "type=communication\n\
                     version=1.0\n\
                     function start_bot<void> thread\n\
                     function get_message<char> single\n\

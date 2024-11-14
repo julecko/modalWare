@@ -157,11 +157,15 @@ cp .\modules\DiscordBot\discord_bot.dll .\x64\Debug\discord_bot.dll</Command>
     <ClCompile Include="modalWare.cpp" />
     <ClCompile Include="ConfigManager\Config.cpp" />
     <ClCompile Include="src\CommandAndControll.cpp" />
+    <ClCompile Include="src\FunctionPointer.cpp" />
+    <ClCompile Include="src\ModuleLoading.cpp" />
     <ClCompile Include="Test\Test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConfigManager\Config.h" />
     <ClInclude Include="src\CommandsAndControll.h" />
+    <ClInclude Include="src\FunctionPointer.h" />
+    <ClInclude Include="src\ModuleLoading.h" />
     <ClInclude Include="Test\Test.h" />
   </ItemGroup>
   <ItemGroup>

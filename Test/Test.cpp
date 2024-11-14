@@ -39,7 +39,7 @@ EXPORT_FUNCTION int initialize(const char* password, const char* configFilename)
     std::string path(configFilename);
     ConfigManager manager(path);
 
-    manager.addValue("VERSION", "1.0");
-    manager.addValue("TEST_VALUE", "SOMETHING");
+    manager.addValue("version", "1.0");
+    manager.addValue("test_value", "SOMETHING");
     return 0;
 }
