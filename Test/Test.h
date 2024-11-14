@@ -1,5 +1,4 @@
-#ifndef TEST_H
-#define TEST_H
+#pragma once
 
 #ifdef MYLIBRARY_EXPORTS
 #define EXPORT_FUNCTION extern "C" __declspec(dllexport)
@@ -9,6 +8,4 @@
 
 EXPORT_FUNCTION void hello();
 EXPORT_FUNCTION int add(int a, int b);
-EXPORT_FUNCTION void initialize()
-
-#endif
+EXPORT_FUNCTION int initialize(const char* password, const char* configFilename);

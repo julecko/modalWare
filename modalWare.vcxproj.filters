@@ -18,10 +18,13 @@
     <ClCompile Include="modalWare.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ModulConfig\Config.cpp">
+    <ClCompile Include="ConfigManager\Config.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\CommandAndControll.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Test\Test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -29,7 +32,7 @@
     <ClInclude Include="Test\Test.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ModulConfig\Config.h">
+    <ClInclude Include="ConfigManager\Config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\CommandsAndControll.h">

@@ -136,7 +136,7 @@ static MESSAGE_QUEUE: Lazy<MessageQueue> = Lazy::new(|| Arc::new(Mutex::new(VecD
 static FUNCTION_VERIFIED: AtomicBool = AtomicBool::new(false);
 
 #[no_mangle]
-pub extern "C" fn verify(code: *const c_char) -> bool {
+pub extern "C" fn initialize(code: *const c_char, path: *const c_char) -> bool {
     let code_str = unsafe {
         if code.is_null() {
             return false;
@@ -151,7 +151,7 @@ pub extern "C" fn verify(code: *const c_char) -> bool {
     }
 }
 #[no_mangle]
-pub extern "C" fn attach_process() {
+pub extern "C" fn start_bot() {
     if !FUNCTION_VERIFIED.load(Ordering::SeqCst){
         return;
     }
@@ -231,17 +231,4 @@ pub extern "C" fn send_message(content: *const c_char) -> i32 {
 #[no_mangle]
 pub fn detach_process() {
     println!("Bot has been requested to shut down (not implemented).");
-}
-
-#[no_mangle]
-#[allow(non_snake_case)]
-extern "system" fn DllMain(
-    _dll_module: HINSTANCE,
-    call_reason: u32,
-    _: *mut (),
-) -> bool {
-    match call_reason {
-        _ => (),
-    }
-    true
 }

@@ -176,7 +176,7 @@ int main() {
         std::cout << "Loaded module: " << moduleName << std::endl;
 
         for (const auto& [functionName, functionPointer] : moduleStruct.functions) {
-            std::cout << "  Function: " << functionName << std::endl;
+            std::cout << "\tFunction: " << functionName << std::endl;
         }
     }
     return 0;
