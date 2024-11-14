@@ -120,6 +120,16 @@
       <AdditionalLibraryDirectories>$(VcpkgRoot)\installed\x64-windows-static\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libcurl.lib;libssl.lib;Ws2_32.lib;libcrypto.lib;Crypt32.lib;Advapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>cd $(SolutionDir)
+
+cd Communication\discord_bot
+cargo build --release
+echo Building discord_bot.dll
+move /y .\target\release\discord_bot.dll .\..\..\modules\DiscordBot\discord_bot.dll
+cd .\..\..\
+cp .\modules\DiscordBot\discord_bot.dll .\x64\Debug\discord_bot.dll</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>

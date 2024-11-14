@@ -11,9 +11,10 @@ use std::sync::{Arc, Mutex};
 use std::collections::VecDeque;
 use serenity::model::gateway::Ready;
 use once_cell::sync::Lazy;
-use windows::Win32::Foundation::*;
-use windows::Win32::System::SystemServices::*;
+use std::fs::File;
+use std::io::{self, Write};
 use tokio::runtime::Runtime;
+use std::path::Path;
 
 const TOKEN: &str = "YOUR_DISCORD_TOKEN"; //Add TOKEN
 const MY_GUILD_ID: u64 = 1083863758146912297;
@@ -136,19 +137,44 @@ static MESSAGE_QUEUE: Lazy<MessageQueue> = Lazy::new(|| Arc::new(Mutex::new(VecD
 static FUNCTION_VERIFIED: AtomicBool = AtomicBool::new(false);
 
 #[no_mangle]
-pub extern "C" fn initialize(code: *const c_char, path: *const c_char) -> bool {
+pub extern "C" fn initialize(code: *const c_char, path: *const c_char) -> i32 {
     let code_str = unsafe {
         if code.is_null() {
-            return false;
+            return -1;
         }
         CStr::from_ptr(code).to_string_lossy().into_owned()
     };
-    if code_str == "1234" {
-        FUNCTION_VERIFIED.store(true, Ordering::SeqCst);
-        true
-    } else {
-        false
+    if !(code_str == "12234") {
+        return -1;
     }
+    FUNCTION_VERIFIED.store(true, Ordering::SeqCst);
+
+    let path_str = unsafe {
+        if path.is_null() {
+            return -2;
+        }
+        CStr::from_ptr(path).to_string_lossy().into_owned()
+    };
+    if Path::new(&path_str).exists() {
+        return 1;
+    }
+    let content = "
+                    type=communication\n\
+                    version=1.0\n\
+                    function start_bot<void> thread\n\
+                    function get_message<char> single\n\
+                    function send_message<int, char> single";
+
+    // Write the content to the file
+    if let Err(_e) = write_to_file(&path_str, content) {
+        return -1;
+    }
+    return 0;
+}
+fn write_to_file(path: &str, content: &str) -> io::Result<()> {
+    let mut file = File::create(path)?;
+    file.write_all(content.as_bytes())?;
+    Ok(())
 }
 #[no_mangle]
 pub extern "C" fn start_bot() {
@@ -227,8 +253,4 @@ pub extern "C" fn send_message(content: *const c_char) -> i32 {
             -1
         },
     }
-}
-#[no_mangle]
-pub fn detach_process() {
-    println!("Bot has been requested to shut down (not implemented).");
 }

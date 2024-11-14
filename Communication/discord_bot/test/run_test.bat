@@ -1,1 +1,0 @@
-move ..\target\release\discord_bot.dll discord_bot.dll && g++ test.cpp -o test_program && .\test_program.exe
