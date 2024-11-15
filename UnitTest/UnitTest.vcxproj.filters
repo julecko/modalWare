@@ -24,5 +24,8 @@
     <ClCompile Include="..\ConfigManager\Config.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\FunctionPointer.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

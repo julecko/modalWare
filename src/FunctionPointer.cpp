@@ -1,10 +1,13 @@
 #include "FunctionPointer.h"
 
+//Here will be some function templates used for standard functions
+template int FunctionPointer::manualCall<int, const char*, const char*>(const char*, const char*);
+template int FunctionPointer::manualCall<int, int, int>(int, int);
+
 void* FunctionPointer::getAddress() {
     return (void*)this->func;
 }
 int FunctionPointer::set(const std::string& functionName, HMODULE hModule) {
-    this->name = functionName;
     FARPROC addr = GetProcAddress(hModule, functionName.c_str());
     if (!addr) {
         return 1;
@@ -21,7 +24,15 @@ int FunctionPointer::setDirect(const FARPROC& functionPointer) {
     return 0;
 }
 template <typename Ret, typename... Args>
-Ret FunctionPointer::call(Args... args) const {
+Ret FunctionPointer::manualCall(Args... args) {
+    if (this->function_type == FunctionType::THREAD) {
+        callInThread<Ret>(std::forward<Args>(args)...);
+        return Ret();
+    }
+    return callSingle<Ret>(std::forward<Args>(args)...);
+}
+template <typename Ret, typename... Args>
+Ret FunctionPointer::callSingle(Args... args) {
     using FuncPtr = Ret(*)(Args...);
     FuncPtr f = reinterpret_cast<FuncPtr>(this->func);
     if (!f) {
@@ -30,14 +41,247 @@ Ret FunctionPointer::call(Args... args) const {
     return f(std::forward<Args>(args)...);
 }
 template <typename Ret, typename... Args>
-void FunctionPointer::callInThread(Args... args) const {
+int FunctionPointer::callInThread(Args... args) {
     std::thread([this, args...]() {
         try {
-            this->call<Ret>(args...);
+            this->manualCall<Ret>(args...);
         }
-        catch (const std::exception& ex) {
-            std::cerr << "Error calling function in thread: " << ex.what() << std::endl;
+        catch (const std::exception&) {
+            return 1;
         }
+        return 0;
         }).detach();
+    return 0;
 }
-template int FunctionPointer::call<int, const char*, const char*>(const char*, const char*) const;
+FunctionResult FunctionPointer::autoCall(std::any arg1_val, std::any arg2_val) {
+    FunctionResult result;
+    if (!isInitialized()) {
+        result.resultID = -1;
+        return result;
+    }
+
+    if (function_type == FunctionType::THREAD) {
+        result.resultID = ValueType::INT_TYPE;
+        if (argCount == 0) {
+            this->callInThread<void>();
+        }
+        else if (argCount == 1) {
+            if (arg1_type == ValueType::INT_TYPE) {
+                int arg1 = std::any_cast<int>(arg1_val);
+                result.value.int_result = this->callInThread<void, int>(arg1);
+            }
+            else if (arg1_type == ValueType::CHAR_TYPE) {
+                const char* arg1 = std::any_cast<const char*>(arg1_val);
+                result.value.int_result = this->callInThread<void, const char*>(arg1);
+            }
+            else if (arg1_type == ValueType::FLOAT_TYPE) {
+                float arg1 = std::any_cast<float>(arg1_val);
+                result.value.int_result = this->callInThread<void, float>(arg1);
+            }
+            else {
+                result.resultID = -1;
+            }
+        }
+        else if (argCount == 2) {
+            if (arg1_type == ValueType::INT_TYPE && arg2_type == ValueType::INT_TYPE) {
+                int arg1 = std::any_cast<int>(arg1_val);
+                int arg2 = std::any_cast<int>(arg2_val);
+                result.value.int_result = this->callInThread<void, int, int>(arg1, arg2);
+            }
+            else if (arg1_type == ValueType::CHAR_TYPE && arg2_type == ValueType::CHAR_TYPE) {
+                const char* arg1 = std::any_cast<const char*>(arg1_val);
+                const char* arg2 = std::any_cast<const char*>(arg2_val);
+                result.value.int_result = this->callInThread<void, const char*, const char*>(arg1, arg2);
+            }
+            else if (arg1_type == ValueType::INT_TYPE && arg2_type == ValueType::CHAR_TYPE) {
+                int arg1 = std::any_cast<int>(arg1_val);
+                const char* arg2 = std::any_cast<const char*>(arg2_val);
+                result.value.int_result = this->callInThread<void, int, const char*>(arg1, arg2);
+            }
+            else {
+                result.resultID = -1;
+            }
+        }
+    }
+    else if (function_type == FunctionType::SINGLE) {
+        result.resultID = this->return_type;
+        if (return_type == ValueType::NONE_TYPE) {
+            if (argCount == 0) {
+                this->callSingle<void>();
+            }
+            else if (argCount == 1) {
+                if (arg1_type == ValueType::INT_TYPE) {
+                    int arg1 = std::any_cast<int>(arg1_val);
+                    this->callSingle<void, int>(arg1);
+                }
+                else if (arg1_type == ValueType::CHAR_TYPE) {
+                    const char* arg1 = std::any_cast<const char*>(arg1_val);
+                    this->callSingle<void, const char*>(arg1);
+                }
+                else if (arg1_type == ValueType::FLOAT_TYPE) {
+                    float arg1 = std::any_cast<float>(arg1_val);
+                    this->callSingle<void, float>(arg1);
+                }
+                else {
+                    result.resultID = -1;
+                }
+            }
+            else if (argCount == 2) {
+                if (arg1_type == ValueType::INT_TYPE && arg2_type == ValueType::INT_TYPE) {
+                    int arg1 = std::any_cast<int>(arg1_val);
+                    int arg2 = std::any_cast<int>(arg2_val);
+                    this->callSingle<void, int, int>(arg1, arg2);
+                }
+                else if (arg1_type == ValueType::CHAR_TYPE && arg2_type == ValueType::CHAR_TYPE) {
+                    const char* arg1 = std::any_cast<const char*>(arg1_val);
+                    const char* arg2 = std::any_cast<const char*>(arg2_val);
+                    this->callSingle<void, const char*, const char*>(arg1, arg2);
+                }
+                else if (arg1_type == ValueType::INT_TYPE && arg2_type == ValueType::CHAR_TYPE) {
+                    int arg1 = std::any_cast<int>(arg1_val);
+                    const char* arg2 = std::any_cast<const char*>(arg2_val);
+                    this->callSingle<void, int, const char*>(arg1, arg2);
+                }
+                else {
+                    result.resultID = -1;
+                }
+            }
+        }
+        else if (return_type == ValueType::INT_TYPE) {
+            if (argCount == 0) {
+                result.value.int_result = this->callSingle<int>();
+            }
+            else if (argCount == 1) {
+                if (arg1_type == ValueType::INT_TYPE) {
+                    int arg1 = std::any_cast<int>(arg1_val);
+                    result.value.int_result = this->callSingle<int, int>(arg1);
+                }
+                else if (arg1_type == ValueType::CHAR_TYPE) {
+                    const char* arg1 = std::any_cast<const char*>(arg1_val);
+                    result.value.int_result = this->callSingle<int, const char*>(arg1);
+                }
+                else if (arg1_type == ValueType::FLOAT_TYPE) {
+                    float arg1 = std::any_cast<float>(arg1_val);
+                    result.value.int_result = this->callSingle<int, float>(arg1);
+                }
+                else {
+                    result.resultID = -1;
+                }
+            }
+            else if (argCount == 2) {
+                if (arg1_type == ValueType::INT_TYPE && arg2_type == ValueType::INT_TYPE) {
+                    int arg1 = std::any_cast<int>(arg1_val);
+                    int arg2 = std::any_cast<int>(arg2_val);
+                    result.value.int_result = this->callSingle<int, int, int>(arg1, arg2);
+                }
+                else if (arg1_type == ValueType::CHAR_TYPE && arg2_type == ValueType::CHAR_TYPE) {
+                    const char* arg1 = std::any_cast<const char*>(arg1_val);
+                    const char* arg2 = std::any_cast<const char*>(arg2_val);
+                    result.value.int_result = this->callSingle<int, const char*, const char*>(arg1, arg2);
+                }
+                else if (arg1_type == ValueType::INT_TYPE && arg2_type == ValueType::CHAR_TYPE) {
+                    int arg1 = std::any_cast<int>(arg1_val);
+                    const char* arg2 = std::any_cast<const char*>(arg2_val);
+                    result.value.int_result = this->callSingle<int, int, const char*>(arg1, arg2);
+                }
+                else {
+                    result.resultID = -1;
+                }
+            }
+        }
+        else if (return_type == ValueType::CHAR_TYPE) {
+            if (argCount == 0) {
+                result.value.char_result = this->callSingle<char*>();
+            }
+            else if (argCount == 1) {
+                if (arg1_type == ValueType::INT_TYPE) {
+                    int arg1 = std::any_cast<int>(arg1_val);
+                    result.value.char_result = this->callSingle<char*, int>(arg1);
+                }
+                else if (arg1_type == ValueType::CHAR_TYPE) {
+                    const char* arg1 = std::any_cast<const char*>(arg1_val);
+                    result.value.char_result = this->callSingle<char*, const char*>(arg1);
+                }
+                else if (arg1_type == ValueType::FLOAT_TYPE) {
+                    float arg1 = std::any_cast<float>(arg1_val);
+                    result.value.char_result = this->callSingle<char*, float>(arg1);
+                }
+                else {
+                    result.resultID = -1;
+                }
+            }
+            else if (argCount == 2) {
+                if (arg1_type == ValueType::INT_TYPE && arg2_type == ValueType::INT_TYPE) {
+                    int arg1 = std::any_cast<int>(arg1_val);
+                    int arg2 = std::any_cast<int>(arg2_val);
+                    result.value.char_result = this->callSingle<char*, int, int>(arg1, arg2);
+                }
+                else if (arg1_type == ValueType::CHAR_TYPE && arg2_type == ValueType::CHAR_TYPE) {
+                    const char* arg1 = std::any_cast<const char*>(arg1_val);
+                    const char* arg2 = std::any_cast<const char*>(arg2_val);
+                    result.value.char_result = this->callSingle<char*, const char*, const char*>(arg1, arg2);
+                }
+                else if (arg1_type == ValueType::INT_TYPE && arg2_type == ValueType::CHAR_TYPE) {
+                    int arg1 = std::any_cast<int>(arg1_val);
+                    const char* arg2 = std::any_cast<const char*>(arg2_val);
+                    result.value.char_result = this->callSingle<char*, int, const char*>(arg1, arg2);
+                }
+                else {
+                    result.resultID = -1;
+                }
+            }
+        }
+        else if (return_type == ValueType::FLOAT_TYPE) {
+            if (argCount == 0) {
+                result.value.float_result = this->callSingle<float>();
+            }
+            else if (argCount == 1) {
+                if (arg1_type == ValueType::INT_TYPE) {
+                    int arg1 = std::any_cast<int>(arg1_val);
+                    result.value.float_result = this->callSingle<float, int>(arg1);
+                }
+                else if (arg1_type == ValueType::CHAR_TYPE) {
+                    const char* arg1 = std::any_cast<const char*>(arg1_val);
+                    result.value.float_result = this->callSingle<float, const char*>(arg1);
+                }
+                else if (arg1_type == ValueType::FLOAT_TYPE) {
+                    float arg1 = std::any_cast<float>(arg1_val);
+                    result.value.float_result = this->callSingle<float, float>(arg1);
+                }
+                else {
+                    result.resultID = -1;
+                }
+            }
+            else if (argCount == 2) {
+                if (arg1_type == ValueType::INT_TYPE && arg2_type == ValueType::INT_TYPE) {
+                    int arg1 = std::any_cast<int>(arg1_val);
+                    int arg2 = std::any_cast<int>(arg2_val);
+                    result.value.float_result = this->callSingle<float, int, int>(arg1, arg2);
+                }
+                else if (arg1_type == ValueType::CHAR_TYPE && arg2_type == ValueType::CHAR_TYPE) {
+                    const char* arg1 = std::any_cast<const char*>(arg1_val);
+                    const char* arg2 = std::any_cast<const char*>(arg2_val);
+                    result.value.float_result = this->callSingle<float, const char*, const char*>(arg1, arg2);
+                }
+                else if (arg1_type == ValueType::INT_TYPE && arg2_type == ValueType::CHAR_TYPE) {
+                    int arg1 = std::any_cast<int>(arg1_val);
+                    const char* arg2 = std::any_cast<const char*>(arg2_val);
+                    result.value.float_result = this->callSingle<float, int, const char*>(arg1, arg2);
+                }
+                else {
+                    result.resultID = -1;
+                }
+            }
+        }
+    }
+    return result;
+}
+bool FunctionPointer::isInitialized() const {
+    return !(
+        this->function_type == FunctionType::DEFAULT ||
+        this->arg1_type == ValueType::DEFAULT_TYPE ||
+        this->arg2_type == ValueType::DEFAULT_TYPE ||
+        this->return_type == ValueType::DEFAULT_TYPE ||
+        this->argCount == -1 ||
+        this->func == nullptr);
+}

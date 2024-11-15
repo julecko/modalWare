@@ -159,6 +159,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\ConfigManager\Config.cpp" />
+    <ClCompile Include="..\src\FunctionPointer.cpp" />
     <ClCompile Include="..\Test\Test.cpp" />
     <ClCompile Include="UnitTest.cpp" />
   </ItemGroup>

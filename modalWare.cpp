@@ -6,6 +6,7 @@
 #include "./ConfigManager/Config.h"
 #include "./src/CommandsAndControll.h"
 #include "./src/ModuleLoading.h"
+#include "./src/FunctionPointer.h"
 
 
 int main() {

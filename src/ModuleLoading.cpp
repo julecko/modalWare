@@ -66,7 +66,7 @@ static int initializeModul(std::unordered_map<std::string, FunctionPointer>& fun
         std::cout << "Error initializing" << std::endl;
         return 1;
     }
-    int initializeStatus = it->second.call<int, const char*, const char*>(VERIFICATION_CODE, location.c_str());
+    int initializeStatus = it->second.manualCall<int, const char*, const char*>(VERIFICATION_CODE, location.c_str());
     std::cout << "Initialized with error code: " << initializeStatus << std::endl;
     return 0;
 }
@@ -84,7 +84,7 @@ static std::vector<std::filesystem::path> getExtensionsPath() {
     }
     return paths;
 }
-static std::unordered_map<std::string, ModuleStruct> loadExtensions(std::vector<std::filesystem::path> paths) {
+static std::unordered_map<std::string, ModuleStruct> loadExtensions(const std::vector<std::filesystem::path>& paths) {
     std::unordered_map<std::string, ModuleStruct> extensions;
     for (const std::filesystem::path path : paths) {
         ModuleStruct module;
@@ -94,21 +94,22 @@ static std::unordered_map<std::string, ModuleStruct> loadExtensions(std::vector<
 
         std::string confFilePath = ConfigManager::replaceFilename(path, "config").string();
         initializeModul(module.functions, confFilePath);
-        ConfigManager manager(confFilePath);
 
+        ConfigManager manager(confFilePath);
         std::string version = manager.getValue("version");
         if (version.empty()) {
             std::cout << "Corrupted config File -> " << path.string() << std::endl;
         }
-        else {
-            module.version = version;
-        }
+        module.metadata = manager.getPairs();
 
         // TODO add configuration loading
 
         extensions[path.filename().string()] = module;
     }
     return extensions;
+}
+static int loadFunctionsConfig(const std::filesystem::path& path, const std::unordered_map<std::string, FunctionPointer>& functions) {
+
 }
 std::unordered_map<std::string, ModuleStruct> getExtensions() {
     std::vector<std::filesystem::path> paths = getExtensionsPath();

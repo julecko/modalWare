@@ -122,14 +122,20 @@
     </Link>
     <PostBuildEvent>
       <Command>cd $(SolutionDir)
-
-cd Communication\discord_bot
-cargo build --release
-echo Building discord_bot.dll
-move /y .\target\release\discord_bot.dll .\..\..\modules\DiscordBot\discord_bot.dll
-cd .\..\..\
-cp .\modules\DiscordBot\discord_bot.dll .\x64\Debug\discord_bot.dll</Command>
+move /y .\Communication\discord_bot\target\release\discord_bot.dll .\modules\DiscordBot\discord_bot.dll
+move /y .\Test\Test.dll .\modules\Test\test.dll
+copy /y .\modules\Test\test.dll .\x64\Debug\test.dll
+copy /y .\modules\DiscordBot\discord_bot.dll .\x64\Debug\discord_bot.dll</Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>cd $(SolutionDir)
+echo Building test.dll
+call .\compile_library.bat Test\Test.cpp
+
+cd .\Communication\discord_bot
+echo Building discord_bot.dll
+cargo build --release</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
