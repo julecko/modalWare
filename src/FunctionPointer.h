@@ -37,6 +37,7 @@ public:
     ValueType arg1_type = ValueType::DEFAULT_TYPE;
     ValueType arg2_type = ValueType::DEFAULT_TYPE;
     int8_t argCount = -1; //Either 1 or 2
+    int interval = -1;
 
     // Retrieves the address of the function pointer.
     void* getAddress();

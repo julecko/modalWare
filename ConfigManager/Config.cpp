@@ -108,6 +108,74 @@ int ConfigManager::deleteFile() {
         return 2;
     }
 }
+int ConfigManager::writeFunction(const FunctionData& data) {
+    if (!this->allowFunc) {
+        return 1;
+    }
+    std::ofstream outFile(this->filename, std::ios::app);
+
+    outFile << data.name << "<" << data.returnType;
+
+    if (!data.argTypes.empty()) {
+        outFile << ", ";
+        for (size_t i = 0; i < data.argTypes.size(); ++i) {
+            outFile << data.argTypes[i];
+            if (i < data.argTypes.size() - 1) {
+                outFile << ", ";
+            }
+        }
+    }
+    outFile << "> ";
+
+    outFile << data.funcType;
+
+    if (data.interval != -1) {
+        outFile << "~" << data.interval;
+    }
+
+    outFile << std::endl;
+    return 0;
+}
+void ConfigManager::initializeFunctionWriting() {
+    std::ofstream outFile(this->filename, std::ios::app);
+    outFile << "Functions" << std::endl;
+    this->allowFunc = true;
+}
+std::vector<std::string> splitTypes(const std::string& str) {
+    std::vector<std::string> types;
+    std::stringstream ss(str);
+    std::string token;
+
+    while (std::getline(ss, token, ',')) {
+        token.erase(token.begin(), std::find_if(token.begin(), token.end(), [](unsigned char ch) {
+            return !std::isspace(ch);
+            }));
+        token.erase(std::find_if(token.rbegin(), token.rend(), [](unsigned char ch) {
+            return !std::isspace(ch);
+            }).base(), token.end());
+        types.push_back(token);
+    }
+    return types;
+}
+FunctionData ConfigManager::processFunctionLine(const std::string& line) {
+    const std::regex functionRegex(R"((\w+)<([^>]+)> (\w+)(?:~(\d+))?)");
+    std::smatch match;
+    FunctionData info;
+
+    if (std::regex_match(line, match, functionRegex)) {
+        info.name = match[1];
+        std::vector<std::string> types = splitTypes(match[2]);
+        info.returnType = types.front();
+        types.erase(types.begin());
+        info.argTypes = types;
+        info.funcType = match[3];
+
+        if (match[4].matched) {
+            info.interval = std::stoi(match[4]);
+        }
+    }
+    return info;
+}
 std::filesystem::path ConfigManager::replaceFilename(const std::filesystem::path& dllPath, const std::string& newFilename) {
     std::filesystem::path parentPath = dllPath.parent_path();
     return parentPath / newFilename;

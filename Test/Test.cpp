@@ -33,7 +33,6 @@ EXPORT_FUNCTION int initialize(const char* password, const char* configFilename)
         return 1;
     }
     if (std::filesystem::exists(configFilename)) {
-        std::cout << "Configuration file already exists, initialization skipped." << std::endl;
         return 1;
     }
     std::string path(configFilename);
@@ -41,5 +40,12 @@ EXPORT_FUNCTION int initialize(const char* password, const char* configFilename)
 
     manager.addValue("version", "1.0");
     manager.addValue("test_value", "SOMETHING");
+
+    manager.initializeFunctionWriting();
+    FunctionData addFunc = { "add", "int", {"int, int"}, "single" };
+    FunctionData helloFunc = { "hello", "void", {}, "single", 5 };
+    manager.writeFunction(addFunc);
+    manager.writeFunction(helloFunc);
+
     return 0;
 }

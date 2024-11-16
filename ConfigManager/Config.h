@@ -5,7 +5,16 @@
 #include <unordered_map>
 #include <sstream>
 #include <filesystem>
+#include <vector>
+#include <regex>
 
+struct FunctionData {
+	std::string name;
+	std::string returnType;
+	std::vector<std::string> argTypes; // Max 2, min 0
+	std::string funcType;
+	int interval = -1;
+};
 
 class ConfigManager {
 public:
@@ -65,6 +74,27 @@ public:
 	int deleteFile();
 
 	/**
+	* @brief Allow functions to be written in file
+	*
+	* @return Returns 0 if successful, 1 on failure
+	*/
+	void initializeFunctionWriting();
+
+	/**
+	* @brief Writes configuration for function into config file
+	*
+	* @return Returns 0 if successful, 1 on failure
+	*/
+	int writeFunction(const FunctionData& data);
+
+	/**
+	* @brief Extracts data from configuration files line
+	*
+	* @return Returns data about function
+	*/
+	static FunctionData processFunctionLine(const std::string& line);
+
+	/**
 	* @brief Replaces filename in path
 	*
 	* @return Returns new filename
@@ -72,4 +102,5 @@ public:
 	static std::filesystem::path replaceFilename(const std::filesystem::path& dllPath, const std::string& newFilename);
 private:
 	std::string filename;
+	bool allowFunc;
 };

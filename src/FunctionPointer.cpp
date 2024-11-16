@@ -36,21 +36,26 @@ Ret FunctionPointer::callSingle(Args... args) {
     using FuncPtr = Ret(*)(Args...);
     FuncPtr f = reinterpret_cast<FuncPtr>(this->func);
     if (!f) {
-        throw std::runtime_error("Function pointer is not set.");
+        return Ret();
     }
     return f(std::forward<Args>(args)...);
 }
 template <typename Ret, typename... Args>
 int FunctionPointer::callInThread(Args... args) {
-    std::thread([this, args...]() {
-        try {
-            this->manualCall<Ret>(args...);
-        }
-        catch (const std::exception&) {
-            return 1;
-        }
-        return 0;
-        }).detach();
+    try {
+        std::thread([this, args...]() {
+            try {
+                this->manualCall<Ret>(args...);
+            }
+            catch (const std::exception& ex) {
+                std::cerr << "Thread exception: " << ex.what() << std::endl;
+            }
+            }).detach();
+    }
+    catch (const std::exception& ex) {
+        std::cerr << "Failed to launch thread: " << ex.what() << std::endl;
+        return 1;
+    }
     return 0;
 }
 FunctionResult FunctionPointer::autoCall(std::any arg1_val, std::any arg2_val) {

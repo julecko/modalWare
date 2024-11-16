@@ -4,17 +4,18 @@
 #include "CppUnitTest.h"
 #include "../Test/Test.h"
 #include "../src/FunctionPointer.h"
+#include "../src/ModuleLoading.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace Modules
 {   
     typedef int (*pInitializeFunc)(const char*, const char*);
+    const char* correctPassword = "12234";
     TEST_CLASS(TestLibraryTesting)
     {
     public:
-        const char* correctPassword = "12234";
-        const char* configFilename = "test_config.json";
+        const char* configFilename = "test.conf";
 
         TEST_METHOD(TestInitialize)
         {
@@ -55,7 +56,7 @@ namespace Modules
             pInitializeFunc initialize = (pInitializeFunc)GetProcAddress(hModule, "initialize");
             Assert::IsNotNull((void*)initialize, L"Failed to find 'initialize' function");
 
-            int result = initialize("12234", "discord_config.conf");
+            int result = initialize(correctPassword, "discord_config.conf");
             Assert::IsTrue(result == 0 || result == 1, L"Initialization of discord bot did not finish successfully");
 
             FreeLibrary(hModule);
@@ -73,8 +74,8 @@ namespace Modules
             pInitializeFunc initialize = (pInitializeFunc)GetProcAddress(hModule, "initialize");
             Assert::IsNotNull((void*)initialize, L"Failed to find 'initialize' function");
 
-            int result = initialize("12234", "test.conf");
-            Assert::IsTrue(result == 0 || result == 1, L"Initialization of discord bot did not finish successfully");
+            int result = initialize(correctPassword, "test.conf");
+            Assert::IsTrue(result == 0 || result == 1, L"Initialization of testing dll did not finish successfully");
 
             FunctionPointer fp;
             
@@ -92,6 +93,17 @@ namespace Modules
             fp.argCount = 2;
             FunctionResult new_result = fp.autoCall(5, 6);
             Assert::AreEqual(11, new_result.value.int_result);
+        }
+    };
+    TEST_CLASS(ModuleLoadingTesting)
+    {
+        TEST_METHOD(ConfigurationLoadingTest)
+        {
+            int result = initialize(correctPassword, "test.conf");
+            Assert::IsTrue(result == 0 || result == 1, L"Initialization of testing dll did not finish successfully");
+
+            std::filesystem::path filePath("test.conf");
+            loadFunctionsConfig(filePath);
         }
     };
 }

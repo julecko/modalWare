@@ -19,5 +19,6 @@ int main() {
             std::cout << "\tFunction: " << functionName << std::endl;
         }
     }
+    std::cout << "END" << std::endl;
     return 0;
 }

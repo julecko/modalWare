@@ -52,3 +52,4 @@ packages/
 # Custom
 .env
 modules/*
+Certificate.pfx
