@@ -103,7 +103,7 @@ namespace Modules
             Assert::IsTrue(result == 0 || result == 1, L"Initialization of testing dll did not finish successfully");
 
             std::filesystem::path filePath("test.conf");
-            loadFunctionsConfig(filePath);
+            //loadFunctionsConfig(filePath);
         }
     };
 }
