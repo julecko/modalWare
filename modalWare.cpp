@@ -7,6 +7,7 @@
 #include "./src/CommandsAndControll.h"
 #include "./src/ModuleLoading.h"
 #include "./src/FunctionPointer.h"
+#include "./src/Types.h"
 
 
 int main() {
@@ -22,3 +23,4 @@ int main() {
     std::cout << "END" << std::endl;
     return 0;
 }
+int startup()

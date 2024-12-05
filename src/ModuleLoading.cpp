@@ -157,7 +157,6 @@ static std::unordered_set<T> symmetric_difference(const std::unordered_set<T>& s
     return result;
 }
 static ValueType convertValueType(const std::string& value) {
-    std::cout << value << std::endl;
     if (value == "int") {
         return ValueType::INT_TYPE;
     }
@@ -195,7 +194,8 @@ std::string valueTypeToString(ValueType type) {
     }
 }
 // DEBUG
-void printFunctions(const std::unordered_map<std::string, FunctionPointer>& functions) {
+static void printFunctions(const std::unordered_map<std::string, FunctionPointer>& functions) {
+    std::cout << "\n\n";
     for (const auto& [name, func] : functions) {
         std::cout << "Function Name: " << name << "\n";
         std::cout << "Function Type: " << functionTypeToString(func.function_type) << "\n";
@@ -211,7 +211,7 @@ void printFunctions(const std::unordered_map<std::string, FunctionPointer>& func
         std::cout << "----------------------------------" << "\n";
     }
 }
-int loadFunctionsConfig(const std::filesystem::path& dllPath, std::unordered_map<std::string, FunctionPointer>& functions) {
+static int loadFunctionsConfig(const std::filesystem::path& dllPath, std::unordered_map<std::string, FunctionPointer>& functions) {
     std::filesystem::path confPath = ConfigManager::replaceFilename(dllPath, "config");
     // First do checks
     if (!std::filesystem::exists(confPath)) {
@@ -275,7 +275,6 @@ int loadFunctionsConfig(const std::filesystem::path& dllPath, std::unordered_map
         functionsInfo.push_back(data);
     }
     file.close();
-    std::cout << "\n\n";
     printFunctions(functions);
     std::unordered_set unusedFunctions = symmetric_difference<std::string>(originalNames, newNames);
     for (const auto& funcName : unusedFunctions) {
@@ -287,6 +286,6 @@ std::unordered_map<std::string, ModuleStruct> getExtensions() {
     std::vector<std::filesystem::path> paths = getExtensionsPath();
     std::unordered_map<std::string, ModuleStruct> extensions = loadExtensions(paths);
 
-    loadFunctionsConfig(paths.at(1), extensions.find("test.dll")->second.functions);
+    loadFunctionsConfig(paths.at(1), extensions.find("test.dll")->second.functions); //TODO Finish loading all extensions
     return extensions;
 }
