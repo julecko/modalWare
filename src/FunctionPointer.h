@@ -13,6 +13,7 @@ private:
     bool isInitialized() const;
 public:
     FunctionType function_type = FunctionType::DEFAULT;
+    CallingType calling_type = CallingType::DEFAULT;
     ValueType return_type = ValueType::DEFAULT_TYPE;
     ValueType arg1_type = ValueType::DEFAULT_TYPE;
     ValueType arg2_type = ValueType::DEFAULT_TYPE;

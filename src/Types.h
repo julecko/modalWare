@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <Windows.h>
 
+
 // Command and Controll
 enum class StatusCode : uint8_t {
 	SUCCESS = 0,
@@ -12,15 +13,20 @@ struct ReturnData {
 	std::string value;
 };
 // For FunctionPointer
-enum FunctionType : uint8_t {
+enum class FunctionType : uint8_t {
     DEFAULT = 0,
     SINGLE = 1,
     THREAD = 2
 };
-enum ValueType : int8_t {
+enum class CallingType : uint8_t {
+    DEFAULT = 0,
+    MANUAL = 1,
+    STARTUP = 2,
+};
+enum class ValueType : int8_t {
     DEFAULT_TYPE = 0,
     NONE_TYPE = 1,
-    INT_TYPE = 2,
+    INT_TYPE = 2,   
     CHAR_TYPE = 3,
     FLOAT_TYPE = 4,
 };
@@ -34,7 +40,7 @@ struct FunctionResult {
     Result value;
 };
 // Module Loading
-#include "FunctionPointer.h"
+class FunctionPointer;
 struct ModuleStruct {
     HMODULE hmodule;
     std::unordered_map<std::string, FunctionPointer> functions;

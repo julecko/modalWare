@@ -23,4 +23,6 @@ int main() {
     std::cout << "END" << std::endl;
     return 0;
 }
-int startup()
+int startup(const std::unordered_map<std::string, FunctionPointer>& functions) {
+    return 1;
+}

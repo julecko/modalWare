@@ -140,7 +140,7 @@ static std::unordered_map<std::string, ModuleStruct> loadExtensions(const std::v
     return extensions;
 }
 template <typename T>
-static std::unordered_set<T> symmetric_difference(const std::unordered_set<T>& set1, const std::unordered_set<T>& set2) {
+static std::unordered_set<T> symetric_difference(const std::unordered_set<T>& set1, const std::unordered_set<T>& set2) {
     std::unordered_set<T> result;
 
     for (const auto& elem : set1) {
@@ -173,8 +173,19 @@ static ValueType convertValueType(const std::string& value) {
         return ValueType::DEFAULT_TYPE;
     }
 }
+static CallingType convertCallingType(const std::string& value) {
+    if (value == "manual") {
+        return CallingType::MANUAL;
+    }
+    else if (value == "startup") {
+        return CallingType::STARTUP;
+    }
+    else {
+        return CallingType::DEFAULT;
+    }
+}
 // DEBUG
-std::string functionTypeToString(FunctionType functionType) {
+static std::string functionTypeToString(FunctionType functionType) {
     switch (functionType) {
     case FunctionType::DEFAULT: return "DEFAULT";
     case FunctionType::SINGLE: return "SINGLE";
@@ -183,7 +194,7 @@ std::string functionTypeToString(FunctionType functionType) {
     }
 }
 // DEBUG
-std::string valueTypeToString(ValueType type) {
+static std::string valueTypeToString(ValueType type) {
     switch (type) {
     case ValueType::DEFAULT_TYPE: return "DEFAULT_TYPE";
     case ValueType::NONE_TYPE: return "NONE_TYPE";
@@ -194,11 +205,21 @@ std::string valueTypeToString(ValueType type) {
     }
 }
 // DEBUG
+static std::string callingTypeToString(CallingType callingType) {
+    switch (callingType) {
+    case CallingType::DEFAULT: return "DEFAULT";
+    case CallingType::MANUAL: return "MANUAL";
+    case CallingType::STARTUP: return "STARTUP";
+    default: return "Unknown";
+    }
+}
+// DEBUG
 static void printFunctions(const std::unordered_map<std::string, FunctionPointer>& functions) {
     std::cout << "\n\n";
     for (const auto& [name, func] : functions) {
         std::cout << "Function Name: " << name << "\n";
         std::cout << "Function Type: " << functionTypeToString(func.function_type) << "\n";
+        std::cout << "Calling Type: " << callingTypeToString(func.calling_type) << "\n";
         std::cout << "Return Type: " << valueTypeToString(func.return_type) << "\n";
         std::cout << "Argument Types (" << static_cast<int>(func.argCount) << "):\n";
         if (func.argCount > 0) {
@@ -243,7 +264,13 @@ static int loadFunctionsConfig(const std::filesystem::path& dllPath, std::unorde
         if (!parsingFunctions) {
             continue;
         }
-        FunctionData data = ConfigManager::processFunctionLine(line);
+        FunctionData data;
+        try {
+            data = ConfigManager::processFunctionLine(line);
+        }
+        catch (const std::exception& e) {
+            continue;
+        }
         if (data.name.empty()) {
             continue;
         }
@@ -252,14 +279,16 @@ static int loadFunctionsConfig(const std::filesystem::path& dllPath, std::unorde
         auto it = functions.find(data.name);
         if (it == functions.end()) {
             std::cout << "Function " << data.name << "not found" << std::endl;
+            continue;
         }
         FunctionPointer& tempFunc = it->second;
 
         tempFunc.function_type = (data.funcType == "single") ? FunctionType::SINGLE : FunctionType::THREAD;
-        tempFunc.argCount = data.argTypes.size();
+        tempFunc.argCount = static_cast<int8_t>(data.argTypes.size());
 
         tempFunc.interval = data.interval;
         tempFunc.return_type = convertValueType(data.returnType);
+        tempFunc.calling_type = convertCallingType(data.callType);
 
         switch (tempFunc.argCount) {
         case 2:
@@ -276,7 +305,7 @@ static int loadFunctionsConfig(const std::filesystem::path& dllPath, std::unorde
     }
     file.close();
     printFunctions(functions);
-    std::unordered_set unusedFunctions = symmetric_difference<std::string>(originalNames, newNames);
+    std::unordered_set unusedFunctions = symetric_difference<std::string>(originalNames, newNames);
     for (const auto& funcName : unusedFunctions) {
         std::cout << "Unused function: " << funcName << std::endl;
     }
@@ -285,7 +314,15 @@ static int loadFunctionsConfig(const std::filesystem::path& dllPath, std::unorde
 std::unordered_map<std::string, ModuleStruct> getExtensions() {
     std::vector<std::filesystem::path> paths = getExtensionsPath();
     std::unordered_map<std::string, ModuleStruct> extensions = loadExtensions(paths);
-
-    loadFunctionsConfig(paths.at(1), extensions.find("test.dll")->second.functions); //TODO Finish loading all extensions
+    for (const auto& path : paths) {
+        auto it = extensions.find(path.filename().string());
+        if (it != extensions.end()) {
+            auto& functions = it->second.functions;
+        }
+        else {
+            continue; //TODO add later error handling
+        }
+        loadFunctionsConfig(path, it->second.functions);
+    }
     return extensions;
 }

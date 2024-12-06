@@ -66,7 +66,7 @@ FunctionResult FunctionPointer::autoCall(std::any arg1_val, std::any arg2_val) {
     }
 
     if (function_type == FunctionType::THREAD) {
-        result.resultID = ValueType::INT_TYPE;
+        result.resultID = static_cast<int8_t>(ValueType::INT_TYPE);
         if (argCount == 0) {
             this->callInThread<void>();
         }
@@ -109,7 +109,7 @@ FunctionResult FunctionPointer::autoCall(std::any arg1_val, std::any arg2_val) {
         }
     }
     else if (function_type == FunctionType::SINGLE) {
-        result.resultID = this->return_type;
+        result.resultID = static_cast<int8_t>(this->return_type);
         if (return_type == ValueType::NONE_TYPE) {
             if (argCount == 0) {
                 this->callSingle<void>();

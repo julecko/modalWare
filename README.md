@@ -9,8 +9,8 @@ During my time learning website development, how all of thoose structures work, 
 Compile using Visual Studio, small separate modules can be compiled using `compile_library.bat`
 
 # Next
-- [ ] Create configuration standard for main program where will be startup functions and loading of this configuration
+- [x] Create configuration standard for main program where will be startup functions and loading of this configuration
 - [ ] Finish command and controll where it will return call of function if it matches the standard
 - [ ] Add command to call function from dll
-- [ ] Add clock to call some functions automaticly
-- [ ] Add configuration file creation for my discord communication module
+- [ ] Add clock to call functions automaticly
+- [x] Add configuration file creation for my discord communication module

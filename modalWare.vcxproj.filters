@@ -50,11 +50,14 @@
     <ClInclude Include="src\FunctionPointer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
     <None Include="LICENSE" />
-    <None Include="compile_library.bat">
+    <None Include="Scripts\compile_library.bat">
       <Filter>Source Files</Filter>
     </None>
     <None Include="Test\Test.def">

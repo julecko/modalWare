@@ -42,8 +42,8 @@ EXPORT_FUNCTION int initialize(const char* password, const char* configFilename)
     manager.addValue("test_value", "SOMETHING");
 
     manager.initializeFunctionWriting();
-    FunctionData addFunc = { "add", "int", {"int, int"}, "single" };
-    FunctionData helloFunc = { "hello", "void", {}, "single", 5 };
+    FunctionData addFunc = { "add", "int", {"int, int"}, "manual", "single"};
+    FunctionData helloFunc = { "hello", "void", {}, "manual", "single", 5};
     manager.writeFunction(addFunc);
     manager.writeFunction(helloFunc);
 

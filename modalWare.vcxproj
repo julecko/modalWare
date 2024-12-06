@@ -130,7 +130,7 @@ copy /y .\modules\DiscordBot\discord_bot.dll .\x64\Debug\discord_bot.dll</Comman
     <PreBuildEvent>
       <Command>cd $(SolutionDir)
 echo Building test.dll
-call .\compile_library.bat Test\Test.cpp
+call .\Scripts\compile_library.bat Test\Test.cpp
 
 cd .\Communication\discord_bot
 echo Building discord_bot.dll
@@ -172,11 +172,12 @@ cargo build --release</Command>
     <ClInclude Include="src\CommandsAndControll.h" />
     <ClInclude Include="src\FunctionPointer.h" />
     <ClInclude Include="src\ModuleLoading.h" />
+    <ClInclude Include="src\Types.h" />
     <ClInclude Include="Test\Test.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".env" />
-    <None Include="compile_library.bat" />
+    <None Include="Scripts\compile_library.bat" />
     <None Include="LICENSE" />
     <None Include="README.md" />
     <None Include="src\SelfDestruct.vbs" />

@@ -126,7 +126,7 @@ int ConfigManager::writeFunction(const FunctionData& data) {
         }
     }
     outFile << "> ";
-
+    outFile << data.callType << "-";
     outFile << data.funcType;
 
     if (data.interval != -1) {
@@ -158,7 +158,8 @@ std::vector<std::string> splitTypes(const std::string& str) {
     return types;
 }
 FunctionData ConfigManager::processFunctionLine(const std::string& line) {
-    const std::regex functionRegex(R"((\w+)<([^>]+)> (\w+)(?:~(\d+))?)");
+    const std::regex functionRegex(R"((\w+)<([^>]+)> (\w+)-(\w+)(?:~(\d+))?)");
+
     std::smatch match;
     FunctionData info;
 
@@ -168,11 +169,15 @@ FunctionData ConfigManager::processFunctionLine(const std::string& line) {
         info.returnType = types.front();
         types.erase(types.begin());
         info.argTypes = types;
-        info.funcType = match[3];
+        info.callType = match[3];
+        info.funcType = match[4];
 
-        if (match[4].matched) {
-            info.interval = std::stoi(match[4]);
+        if (match[5].matched) {
+            info.interval = std::stoi(match[5]);
         }
+    }
+    else {
+        throw std::invalid_argument("Invalid function line format: " + line);
     }
     return info;
 }

@@ -160,9 +160,10 @@ pub extern "C" fn initialize(code: *const c_char, path: *const c_char) -> i32 {
     }
     let content = "type=communication\n\
                     version=1.0\n\
-                    function start_bot<void> thread\n\
-                    function get_message<char> single\n\
-                    function send_message<int, char> single";
+                    Functions
+                    start_bot<void> startup-thread\n\
+                    get_message<char> manual-single\n\
+                    send_message<int, char> manual-single";
 
     // Write the content to the file
     if let Err(_e) = write_to_file(&path_str, content) {

@@ -12,6 +12,7 @@ struct FunctionData {
 	std::string name;
 	std::string returnType;
 	std::vector<std::string> argTypes; // Max 2, min 0
+	std::string callType;
 	std::string funcType;
 	int interval = -1;
 };
