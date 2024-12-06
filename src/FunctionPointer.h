@@ -31,18 +31,18 @@ public:
 
     // Calls the function in specified mode
     template <typename Ret, typename... Args>
-    Ret manualCall(Args... args);
+    Ret manualCall(Args... args) const;
 
     // Calls the function with specified return type and arguments.
     template <typename Ret, typename... Args>
-    Ret callSingle(Args... args);
+    Ret callSingle(Args... args) const;
 
     // Calls the function in a detached thread with specified return type and arguments.
     template <typename Ret, typename... Args>
-    int callInThread(Args... args);
+    int callInThread(Args... args) const;
 
     // Calls function with parameters automaticly
-    FunctionResult autoCall(std::any arg1_val = std::any(), std::any arg2_val = std::any());
+    FunctionResult autoCall(std::any arg1_val = std::any(), std::any arg2_val = std::any()) const;
 private:
     FARPROC func = nullptr;
 };

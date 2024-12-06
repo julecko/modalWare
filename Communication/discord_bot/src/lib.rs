@@ -16,7 +16,7 @@ use std::io::{self, Write};
 use tokio::runtime::Runtime;
 use std::path::Path;
 
-const TOKEN: &str = "YOUR_DISCORD_TOKEN"; //Add TOKEN
+const TOKEN: &str = env!("DISCORD_TOKEN");
 const MY_GUILD_ID: u64 = 1083863758146912297;
 static mut GLOBAL_CHANNEL_ID: Option<ChannelId> = None;
 static mut SESSION_CHANNEL_ID: Option<ChannelId> = None;

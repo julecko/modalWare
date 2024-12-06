@@ -26,7 +26,7 @@ enum class CallingType : uint8_t {
 enum class ValueType : int8_t {
     DEFAULT_TYPE = 0,
     NONE_TYPE = 1,
-    INT_TYPE = 2,   
+    INT_TYPE = 2, 
     CHAR_TYPE = 3,
     FLOAT_TYPE = 4,
 };

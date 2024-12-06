@@ -2,6 +2,7 @@
 name = "discord_bot"
 version = "0.1.0"
 edition = "2021"
+build = "build.rs"
 
 [dependencies]
 once_cell = "1.10"

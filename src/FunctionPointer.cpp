@@ -1,8 +1,8 @@
 #include "FunctionPointer.h"
 
 //Here will be some function templates used for standard functions
-template int FunctionPointer::manualCall<int, const char*, const char*>(const char*, const char*);
-template int FunctionPointer::manualCall<int, int, int>(int, int);
+template int FunctionPointer::manualCall<int, const char*, const char*>(const char*, const char*) const;
+template int FunctionPointer::manualCall<int, int, int>(int, int) const;
 
 void* FunctionPointer::getAddress() {
     return (void*)this->func;
@@ -24,7 +24,7 @@ int FunctionPointer::setDirect(const FARPROC& functionPointer) {
     return 0;
 }
 template <typename Ret, typename... Args>
-Ret FunctionPointer::manualCall(Args... args) {
+Ret FunctionPointer::manualCall(Args... args) const {
     if (this->function_type == FunctionType::THREAD) {
         callInThread<Ret>(std::forward<Args>(args)...);
         return Ret();
@@ -32,7 +32,7 @@ Ret FunctionPointer::manualCall(Args... args) {
     return callSingle<Ret>(std::forward<Args>(args)...);
 }
 template <typename Ret, typename... Args>
-Ret FunctionPointer::callSingle(Args... args) {
+Ret FunctionPointer::callSingle(Args... args) const {
     using FuncPtr = Ret(*)(Args...);
     FuncPtr f = reinterpret_cast<FuncPtr>(this->func);
     if (!f) {
@@ -41,11 +41,11 @@ Ret FunctionPointer::callSingle(Args... args) {
     return f(std::forward<Args>(args)...);
 }
 template <typename Ret, typename... Args>
-int FunctionPointer::callInThread(Args... args) {
+int FunctionPointer::callInThread(Args... args) const {
     try {
         std::thread([this, args...]() {
             try {
-                this->manualCall<Ret>(args...);
+                this->callSingle<Ret>(args...);
             }
             catch (const std::exception& ex) {
                 std::cerr << "Thread exception: " << ex.what() << std::endl;
@@ -56,17 +56,17 @@ int FunctionPointer::callInThread(Args... args) {
         std::cerr << "Failed to launch thread: " << ex.what() << std::endl;
         return 1;
     }
+    std::cout << "Thread exited" << std::endl;
     return 0;
 }
-FunctionResult FunctionPointer::autoCall(std::any arg1_val, std::any arg2_val) {
-    FunctionResult result;
+FunctionResult FunctionPointer::autoCall(std::any arg1_val, std::any arg2_val) const {
+    FunctionResult result{};
     if (!isInitialized()) {
         result.resultID = -1;
         return result;
     }
-
+    result.resultID = static_cast<int8_t>(this->return_type);
     if (function_type == FunctionType::THREAD) {
-        result.resultID = static_cast<int8_t>(ValueType::INT_TYPE);
         if (argCount == 0) {
             this->callInThread<void>();
         }
@@ -109,7 +109,6 @@ FunctionResult FunctionPointer::autoCall(std::any arg1_val, std::any arg2_val) {
         }
     }
     else if (function_type == FunctionType::SINGLE) {
-        result.resultID = static_cast<int8_t>(this->return_type);
         if (return_type == ValueType::NONE_TYPE) {
             if (argCount == 0) {
                 this->callSingle<void>();
@@ -284,8 +283,7 @@ FunctionResult FunctionPointer::autoCall(std::any arg1_val, std::any arg2_val) {
 bool FunctionPointer::isInitialized() const {
     return !(
         this->function_type == FunctionType::DEFAULT ||
-        this->arg1_type == ValueType::DEFAULT_TYPE ||
-        this->arg2_type == ValueType::DEFAULT_TYPE ||
+        this->calling_type == CallingType::DEFAULT ||
         this->return_type == ValueType::DEFAULT_TYPE ||
         this->argCount == -1 ||
         this->func == nullptr);
