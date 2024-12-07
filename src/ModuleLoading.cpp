@@ -13,6 +13,8 @@
 #include <regex>
 #include <sstream>
 
+#include "Types.h"
+#include "Util.h"
 #include "ModuleLoading.h"
 #include "FunctionPointer.h"
 #include "../ConfigManager/Config.h"
@@ -184,54 +186,6 @@ static CallingType convertCallingType(const std::string& value) {
         return CallingType::DEFAULT;
     }
 }
-// DEBUG
-static std::string functionTypeToString(FunctionType functionType) {
-    switch (functionType) {
-    case FunctionType::DEFAULT: return "DEFAULT";
-    case FunctionType::SINGLE: return "SINGLE";
-    case FunctionType::THREAD: return "THREAD";
-    default: return "Unknown";
-    }
-}
-// DEBUG
-static std::string valueTypeToString(ValueType type) {
-    switch (type) {
-    case ValueType::DEFAULT_TYPE: return "DEFAULT_TYPE";
-    case ValueType::NONE_TYPE: return "NONE_TYPE";
-    case ValueType::INT_TYPE: return "INT_TYPE";
-    case ValueType::CHAR_TYPE: return "CHAR_TYPE";
-    case ValueType::FLOAT_TYPE: return "FLOAT_TYPE";
-    default: return "Unknown";
-    }
-}
-// DEBUG
-static std::string callingTypeToString(CallingType callingType) {
-    switch (callingType) {
-    case CallingType::DEFAULT: return "DEFAULT";
-    case CallingType::MANUAL: return "MANUAL";
-    case CallingType::STARTUP: return "STARTUP";
-    default: return "Unknown";
-    }
-}
-// DEBUG
-static void printFunctions(const std::unordered_map<std::string, FunctionPointer>& functions) {
-    std::cout << "\n\n";
-    for (const auto& [name, func] : functions) {
-        std::cout << "Function Name: " << name << "\n";
-        std::cout << "Function Type: " << functionTypeToString(func.function_type) << "\n";
-        std::cout << "Calling Type: " << callingTypeToString(func.calling_type) << "\n";
-        std::cout << "Return Type: " << valueTypeToString(func.return_type) << "\n";
-        std::cout << "Argument Types (" << static_cast<int>(func.argCount) << "):\n";
-        if (func.argCount > 0) {
-            std::cout << "\tArgument1 Type: " << valueTypeToString(func.arg1_type) << "\n";
-        }
-        if (func.argCount == 2) {
-            std::cout << "\tArgument2 Type: " << valueTypeToString(func.arg2_type) << "\n";
-        }
-        std::cout << "Interval: " << (func.interval != -1 ? std::to_string(func.interval) : "Default") << "\n";
-        std::cout << "----------------------------------" << "\n";
-    }
-}
 static int loadFunctionsConfig(const std::filesystem::path& dllPath, std::unordered_map<std::string, FunctionPointer>& functions) {
     std::filesystem::path confPath = ConfigManager::replaceFilename(dllPath, "config");
     // First do checks
@@ -304,7 +258,6 @@ static int loadFunctionsConfig(const std::filesystem::path& dllPath, std::unorde
         functionsInfo.push_back(data);
     }
     file.close();
-    printFunctions(functions);
     std::unordered_set unusedFunctions = symetric_difference<std::string>(originalNames, newNames);
     for (const auto& funcName : unusedFunctions) {
         std::cout << "Unused function: " << funcName << std::endl;

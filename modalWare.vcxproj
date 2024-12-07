@@ -165,6 +165,7 @@ cargo build --release</Command>
     <ClCompile Include="src\CommandAndControll.cpp" />
     <ClCompile Include="src\FunctionPointer.cpp" />
     <ClCompile Include="src\ModuleLoading.cpp" />
+    <ClCompile Include="src\Util.cpp" />
     <ClCompile Include="Test\Test.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -173,6 +174,7 @@ cargo build --release</Command>
     <ClInclude Include="src\FunctionPointer.h" />
     <ClInclude Include="src\ModuleLoading.h" />
     <ClInclude Include="src\Types.h" />
+    <ClInclude Include="src\Util.h" />
     <ClInclude Include="Test\Test.h" />
   </ItemGroup>
   <ItemGroup>

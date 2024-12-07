@@ -7,11 +7,12 @@
 #include "./src/CommandsAndControll.h"
 #include "./src/ModuleLoading.h"
 #include "./src/FunctionPointer.h"
+#include "./src/Util.h"
 #include "./src/Types.h"
 
 //Global variables
 FunctionPointer get_message;
-std::unordered_map<std::string, ModuleStruct> extensions;
+std::unordered_map<std::string, ModuleStruct> modules;
 
 static int startup(const std::unordered_map<std::string, FunctionPointer>& functions) {
     for (const auto& funcEntry : functions) {
@@ -33,25 +34,15 @@ static void loop() {
             std::cout << result.value.char_result << std::endl;
         }
         else {
-            std::cout << "char_result is null!" << std::endl;
+            std::cout << "Message is empty" << std::endl;
         }
         Sleep(2000);
     }
 }
 int main() {
-    extensions = getExtensions();
+    modules = getExtensions();
 
-    for (const auto& [moduleName, moduleStruct] : extensions) {
-        std::cout << "Loaded module: " << moduleName << std::endl;
-        startup(moduleStruct.functions);
-        for (const auto& [functionName, functionPointer] : moduleStruct.functions) {
-            if (functionName == "get_message") {
-                get_message = functionPointer;
-                std::cout << "Get message found" << std::endl;
-            }
-            std::cout << "\tFunction: " << functionName << std::endl;
-        }
-    }
+    std::cout << format::getPrintableModules(modules, true);
     
     std::cout << "END" << std::endl;
     return 0;

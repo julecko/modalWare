@@ -1,7 +1,7 @@
 #pragma once
 #include <unordered_map>
+#include <string>
 #include <Windows.h>
-
 
 // Command and Controll
 enum class StatusCode : uint8_t {

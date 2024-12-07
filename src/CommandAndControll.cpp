@@ -4,6 +4,7 @@
 #include <array>
 #include <string>
 #include <fstream>
+#include "Types.h"
 #include "CommandsAndControll.h"
 
 #define SELFDESTRUCT_NAME "cleaner.vbs"
