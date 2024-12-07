@@ -41,9 +41,12 @@ static void loop() {
 }
 int main() {
     modules = getExtensions();
-
+    get_message = findFunction(modules, "discord_bot.dll", "get_message").fp;
+    for (const auto& [moduleName, moduleStruct] : modules) {
+        startup(moduleStruct.functions);
+    }
     std::cout << format::getPrintableModules(modules, true);
-    
-    std::cout << "END" << std::endl;
+    std::cout << static_cast<int>(findFunction(modules, "discord_bot.dll", "send_message").fp.autoCall(format::getPrintableModules(modules).c_str()).value.int_result) << std::endl;
+    loop();
     return 0;
 }

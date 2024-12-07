@@ -56,7 +56,6 @@ int FunctionPointer::callInThread(Args... args) const {
         std::cerr << "Failed to launch thread: " << ex.what() << std::endl;
         return 1;
     }
-    std::cout << "Thread exited" << std::endl;
     return 0;
 }
 FunctionResult FunctionPointer::autoCall(std::any arg1_val, std::any arg2_val) const {

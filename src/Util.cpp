@@ -82,3 +82,21 @@ namespace format {
         return outputString.str();
     }
 }
+FindingResult findFunction(const std::unordered_map<std::string, ModuleStruct>& modules, std::string moduleName, std::string functionName) {
+    FindingResult result;
+
+    auto moduleIt = modules.find(moduleName);
+    if (moduleIt != modules.end()) {
+        auto& module = moduleIt->second;
+        auto funcIt = module.functions.find(functionName);
+
+        if (funcIt != module.functions.end()) {
+            result.fp = funcIt->second;
+            result.result_id = FindingResultID::SUCCESS;
+        }
+        else {
+            result.result_id = FindingResultID::NO_FUNCTION;
+        }
+    }
+    return result;
+}

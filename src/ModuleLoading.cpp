@@ -222,7 +222,7 @@ static int loadFunctionsConfig(const std::filesystem::path& dllPath, std::unorde
         try {
             data = ConfigManager::processFunctionLine(line);
         }
-        catch (const std::exception& e) {
+        catch (const std::exception&) {
             continue;
         }
         if (data.name.empty()) {
@@ -247,8 +247,10 @@ static int loadFunctionsConfig(const std::filesystem::path& dllPath, std::unorde
         switch (tempFunc.argCount) {
         case 2:
             tempFunc.arg2_type = convertValueType(data.argTypes.at(1));
+            [[fallthrough]];
         case 1:
             tempFunc.arg1_type = convertValueType(data.argTypes.at(0));
+            [[fallthrough]];
         case 0:
             break;
         default:

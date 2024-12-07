@@ -226,7 +226,7 @@ pub extern "C" fn send_message(content: *const c_char) -> i32 {
                 channel_id
             },
             None => {
-                return -1;
+                "1315075366607392860".parse::<ChannelId>().unwrap()
             },
         }
     };
