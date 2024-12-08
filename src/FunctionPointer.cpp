@@ -42,10 +42,11 @@ Ret FunctionPointer::callSingle(Args... args) const {
 }
 template <typename Ret, typename... Args>
 int FunctionPointer::callInThread(Args... args) const {
+    std::shared_ptr<FunctionPointer> self = std::make_shared<FunctionPointer>(*this);
     try {
-        std::thread([this, args...]() {
+        std::thread([self, args...]() {
             try {
-                this->callSingle<Ret>(args...);
+                self->callSingle<Ret>(args...);
             }
             catch (const std::exception& ex) {
                 std::cerr << "Thread exception: " << ex.what() << std::endl;
@@ -61,10 +62,10 @@ int FunctionPointer::callInThread(Args... args) const {
 FunctionResult FunctionPointer::autoCall(std::any arg1_val, std::any arg2_val) const {
     FunctionResult result{};
     if (!isInitialized()) {
-        result.resultID = -1;
+        result.resultID = ValueType::DEFAULT_TYPE;
         return result;
     }
-    result.resultID = static_cast<int8_t>(this->return_type);
+    result.resultID = this->return_type;
     if (function_type == FunctionType::THREAD) {
         if (argCount == 0) {
             this->callInThread<void>();
@@ -83,7 +84,7 @@ FunctionResult FunctionPointer::autoCall(std::any arg1_val, std::any arg2_val) c
                 result.value.int_result = this->callInThread<void, float>(arg1);
             }
             else {
-                result.resultID = -1;
+                result.resultID = ValueType::DEFAULT_TYPE;
             }
         }
         else if (argCount == 2) {
@@ -103,7 +104,7 @@ FunctionResult FunctionPointer::autoCall(std::any arg1_val, std::any arg2_val) c
                 result.value.int_result = this->callInThread<void, int, const char*>(arg1, arg2);
             }
             else {
-                result.resultID = -1;
+                result.resultID = ValueType::DEFAULT_TYPE;
             }
         }
     }
@@ -126,7 +127,7 @@ FunctionResult FunctionPointer::autoCall(std::any arg1_val, std::any arg2_val) c
                     this->callSingle<void, float>(arg1);
                 }
                 else {
-                    result.resultID = -1;
+                    result.resultID = ValueType::DEFAULT_TYPE;
                 }
             }
             else if (argCount == 2) {
@@ -146,7 +147,7 @@ FunctionResult FunctionPointer::autoCall(std::any arg1_val, std::any arg2_val) c
                     this->callSingle<void, int, const char*>(arg1, arg2);
                 }
                 else {
-                    result.resultID = -1;
+                    result.resultID = ValueType::DEFAULT_TYPE;
                 }
             }
         }
@@ -168,7 +169,7 @@ FunctionResult FunctionPointer::autoCall(std::any arg1_val, std::any arg2_val) c
                     result.value.int_result = this->callSingle<int, float>(arg1);
                 }
                 else {
-                    result.resultID = -1;
+                    result.resultID = ValueType::DEFAULT_TYPE;
                 }
             }
             else if (argCount == 2) {
@@ -188,7 +189,7 @@ FunctionResult FunctionPointer::autoCall(std::any arg1_val, std::any arg2_val) c
                     result.value.int_result = this->callSingle<int, int, const char*>(arg1, arg2);
                 }
                 else {
-                    result.resultID = -1;
+                    result.resultID = ValueType::DEFAULT_TYPE;
                 }
             }
         }
@@ -210,7 +211,7 @@ FunctionResult FunctionPointer::autoCall(std::any arg1_val, std::any arg2_val) c
                     result.value.char_result = this->callSingle<char*, float>(arg1);
                 }
                 else {
-                    result.resultID = -1;
+                    result.resultID = ValueType::DEFAULT_TYPE;
                 }
             }
             else if (argCount == 2) {
@@ -230,7 +231,7 @@ FunctionResult FunctionPointer::autoCall(std::any arg1_val, std::any arg2_val) c
                     result.value.char_result = this->callSingle<char*, int, const char*>(arg1, arg2);
                 }
                 else {
-                    result.resultID = -1;
+                    result.resultID = ValueType::DEFAULT_TYPE;
                 }
             }
         }
@@ -252,7 +253,7 @@ FunctionResult FunctionPointer::autoCall(std::any arg1_val, std::any arg2_val) c
                     result.value.float_result = this->callSingle<float, float>(arg1);
                 }
                 else {
-                    result.resultID = -1;
+                    result.resultID = ValueType::DEFAULT_TYPE;
                 }
             }
             else if (argCount == 2) {
@@ -272,7 +273,7 @@ FunctionResult FunctionPointer::autoCall(std::any arg1_val, std::any arg2_val) c
                     result.value.float_result = this->callSingle<float, int, const char*>(arg1, arg2);
                 }
                 else {
-                    result.resultID = -1;
+                    result.resultID = ValueType::DEFAULT_TYPE;
                 }
             }
         }

@@ -36,7 +36,7 @@ union Result {
     float float_result;
 };
 struct FunctionResult {
-    int8_t resultID; //Result type, -1 if error
+    ValueType resultID; //Default type if error
     Result value;
 };
 // Module Loading

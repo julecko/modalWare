@@ -70,6 +70,9 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LibraryPath>$(ProjectDir)\Communication\discord_bot\target\staticlib\release;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <VcpkgUseStatic>true</VcpkgUseStatic>
   </PropertyGroup>
@@ -118,11 +121,14 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(VcpkgRoot)\installed\x64-windows-static\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libcurl.lib;libssl.lib;Ws2_32.lib;libcrypto.lib;Crypt32.lib;Advapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libcurl.lib;libssl.lib;Ws2_32.lib;libcrypto.lib;Crypt32.lib;Advapi32.lib;discord_bot.lib;kernel32.lib;
+ntdll.lib;
+bcrypt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/NODEFAULTLIB:MSVCRT %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
       <Command>cd $(SolutionDir)
-move /y .\Communication\discord_bot\target\release\discord_bot.dll .\modules\DiscordBot\discord_bot.dll
+move /y .\Communication\discord_bot\target\cdylib\release\discord_bot.dll .\modules\DiscordBot\discord_bot.dll
 move /y .\Test\Test.dll .\modules\Test\test.dll
 copy /y .\modules\Test\test.dll .\x64\Debug\test.dll
 copy /y .\modules\DiscordBot\discord_bot.dll .\x64\Debug\discord_bot.dll</Command>
@@ -134,7 +140,7 @@ call .\Scripts\compile_library.bat Test\Test.cpp
 
 cd .\Communication\discord_bot
 echo Building discord_bot.dll
-cargo build --release</Command>
+.\build.bat</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -169,6 +175,7 @@ cargo build --release</Command>
     <ClCompile Include="Test\Test.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Communication\discord_bot\discord_bot.h" />
     <ClInclude Include="ConfigManager\Config.h" />
     <ClInclude Include="src\CommandsAndControll.h" />
     <ClInclude Include="src\FunctionPointer.h" />
@@ -179,6 +186,7 @@ cargo build --release</Command>
   </ItemGroup>
   <ItemGroup>
     <None Include=".env" />
+    <None Include="start.bat" />
     <None Include="Scripts\compile_library.bat" />
     <None Include="LICENSE" />
     <None Include="README.md" />

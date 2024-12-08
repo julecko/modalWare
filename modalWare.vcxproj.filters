@@ -59,6 +59,9 @@
     <ClInclude Include="src\Util.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Communication\discord_bot\discord_bot.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
@@ -71,5 +74,8 @@
     </None>
     <None Include=".env" />
     <None Include="src\SelfDestruct.vbs" />
+    <None Include="start.bat">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

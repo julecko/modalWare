@@ -178,8 +178,11 @@ fn write_to_file(path: &str, content: &str) -> io::Result<()> {
 }
 #[no_mangle]
 pub extern "C" fn start_bot() {
-    if !FUNCTION_VERIFIED.load(Ordering::SeqCst){
-        return;
+    #[cfg(feature = "cdylib")]
+    {
+        if !FUNCTION_VERIFIED.load(Ordering::SeqCst){
+            return;
+        }
     }
     let runtime = tokio::runtime::Runtime::new().expect("Failed to create Tokio runtime");
 
@@ -196,8 +199,11 @@ pub extern "C" fn start_bot() {
 }
 #[no_mangle]
 pub extern "C" fn get_message() -> *const c_char {
-    if !FUNCTION_VERIFIED.load(Ordering::SeqCst){
-        return std::ptr::null();
+    #[cfg(feature = "cdylib")]
+    {
+        if !FUNCTION_VERIFIED.load(Ordering::SeqCst) {
+            return std::ptr::null();
+        }
     }
     let mut queue = MESSAGE_QUEUE.lock().unwrap();
     if let Some(message) = queue.pop_front() {
@@ -209,8 +215,11 @@ pub extern "C" fn get_message() -> *const c_char {
 }
 #[no_mangle]
 pub extern "C" fn send_message(content: *const c_char) -> i32 {
-    if !FUNCTION_VERIFIED.load(Ordering::SeqCst){
-        return -1;
+    #[cfg(feature = "cdylib")]
+    {
+        if !FUNCTION_VERIFIED.load(Ordering::SeqCst){
+            return -1;
+        }
     }
     if content.is_null() {
         return -1;

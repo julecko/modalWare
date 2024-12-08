@@ -42,6 +42,36 @@ namespace format {
         default: return "Unknown";
         }
     }
+    ConvertionResult stringToAny(const std::string &value, const ValueType &type) {
+        ConvertionResult result;
+        result.status_code = StatusCode::FAILURE;
+        switch (type) {
+        case ValueType::DEFAULT_TYPE:
+            break;
+        case ValueType::NONE_TYPE:
+            break;
+        case ValueType::INT_TYPE:
+            try {
+                result.value = std::stoi(value);
+            }
+            catch (const std::exception&) {
+                break;
+            }
+            break;
+        case ValueType::FLOAT_TYPE:
+            try {
+                result.value = std::stof(value);
+            }
+            catch (const std::exception&) {
+                break;
+            }
+            break;
+        case ValueType::CHAR_TYPE:
+            result.value = value.c_str();
+            break;
+        }
+        return result;
+    }
     std::string getPrintableModules(const std::unordered_map<std::string, ModuleStruct>& modules, const bool& pretty) {
         std::stringstream outputString;
         for (const auto& [moduleName, moduleStruct] : modules) {
