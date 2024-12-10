@@ -170,9 +170,6 @@ static ReturnData callFunction(const std::unordered_map<std::string, ModuleStruc
     ConvertionResult cResult1;
     ConvertionResult cResult2;
     switch (words.size()) {
-    case 3:
-        functionResult = findingResult.fp.autoCall();
-        break;
     case 5:
         cResult2 = format::stringToAny(words[4], findingResult.fp.arg2_type);
         if (cResult2.status_code == StatusCode::FAILURE) {
